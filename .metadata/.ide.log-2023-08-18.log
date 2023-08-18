@@ -1,0 +1,36 @@
+2023-08-19 00:00:36,335 [ERROR] FileExtend:455 - File entry not found
+2023-08-19 00:00:36,343 [INFO] FileExtend:240 - Unzip File : stm32cube_fw_f1_v180.zip
+2023-08-19 00:00:36,343 [INFO] FileExtend:255 - Standard Zip Deflate
+2023-08-19 00:00:50,377 [INFO] ServerAccessManage:473 - Download File stm32cube_fw_f1_v185.zip
+2023-08-19 00:01:06,136 [INFO] FileExtend:240 - Unzip File : stm32cube_fw_f1_v185.zip
+2023-08-19 00:01:06,137 [INFO] FileExtend:255 - Standard Zip Deflate
+2023-08-19 00:01:10,227 [INFO] LoadServerPackagesThread:196 - End of LoadServerPackages Thread
+2023-08-19 00:01:10,396 [INFO] ThirdPartyModel:298 - Start build external matchings
+2023-08-19 00:01:10,407 [INFO] UtilMem:75 - End SaveConfig() Used Memory: 575206824 Bytes (1073741824)
+2023-08-19 00:01:11,296 [INFO] BlockDiagram:2759 - set Specific Code input for plugin: NVIC
+2023-08-19 00:01:11,296 [INFO] BlockDiagram:2759 - set Specific Code input for plugin: RCC
+2023-08-19 00:01:11,301 [INFO] CodeGenerator:793 - code generatio: config db path: C:\ST\STM32CubeIDE_1.12.0\STM32CubeIDE\plugins\com.st.stm32cube.common.mx_6.8.0.202302231600\\db\
+2023-08-19 00:01:11,924 [INFO] CodeEngine:255 - oldGeneratedFile, D:\0_Projects\FOTA\FOTA\BootLoader\MXTmpFiles\license.tmp_save
+2023-08-19 00:01:12,341 [INFO] ThirdPartyModel:316 - End build external matchings
+2023-08-19 00:01:12,390 [INFO] CheckServerUpdateThread:120 - End of CheckServer Thread
+2023-08-19 00:01:12,793 [INFO] CodeEngine:279 - Generated code: D:\0_Projects\FOTA\FOTA\BootLoader\MXTmpFiles\license.tmp
+2023-08-19 00:01:12,834 [INFO] CodeEngine:255 - oldGeneratedFile, D:\0_Projects\FOTA\FOTA\BootLoader\Core\Src\stm32f1xx_it.c_save
+2023-08-19 00:01:13,127 [INFO] CodeEngine:279 - Generated code: D:\0_Projects\FOTA\FOTA\BootLoader\Core\Src\stm32f1xx_it.c
+2023-08-19 00:01:13,135 [INFO] CodeEngine:255 - oldGeneratedFile, D:\0_Projects\FOTA\FOTA\BootLoader\Core\Inc\stm32f1xx_it.h_save
+2023-08-19 00:01:13,313 [INFO] CodeEngine:279 - Generated code: D:\0_Projects\FOTA\FOTA\BootLoader\Core\Inc\stm32f1xx_it.h
+2023-08-19 00:01:13,538 [INFO] CodeEngine:255 - oldGeneratedFile, D:\0_Projects\FOTA\FOTA\BootLoader\Core\Src\stm32f1xx_hal_msp.c_save
+2023-08-19 00:01:13,842 [INFO] CodeEngine:279 - Generated code: D:\0_Projects\FOTA\FOTA\BootLoader\Core\Src\stm32f1xx_hal_msp.c
+2023-08-19 00:01:13,851 [INFO] CodeEngine:255 - oldGeneratedFile, D:\0_Projects\FOTA\FOTA\BootLoader\MXTmpFiles\system.tmp_save
+2023-08-19 00:01:13,962 [INFO] CodeEngine:279 - Generated code: D:\0_Projects\FOTA\FOTA\BootLoader\MXTmpFiles\system.tmp
+2023-08-19 00:01:13,973 [INFO] CodeEngine:311 - oldGeneratedFile, D:\0_Projects\FOTA\FOTA\BootLoader\Core\Inc\stm32f1xx_hal_conf.h_save
+2023-08-19 00:01:14,082 [INFO] CodeEngine:335 - Generated code: D:\0_Projects\FOTA\FOTA\BootLoader\Core\Inc\stm32f1xx_hal_conf.h
+2023-08-19 00:01:14,142 [INFO] CodeEngine:255 - oldGeneratedFile, D:\0_Projects\FOTA\FOTA\BootLoader\Core\Inc\main.h_save
+2023-08-19 00:01:14,276 [INFO] CodeEngine:279 - Generated code: D:\0_Projects\FOTA\FOTA\BootLoader\Core\Inc\main.h
+2023-08-19 00:01:14,284 [INFO] CodeEngine:255 - oldGeneratedFile, D:\0_Projects\FOTA\FOTA\BootLoader\Core\Src\main.c_save
+2023-08-19 00:01:14,449 [INFO] CodeEngine:279 - Generated code: D:\0_Projects\FOTA\FOTA\BootLoader\Core\Src\main.c
+2023-08-19 00:01:15,342 [INFO] ProjectBuilder:2996 - Time for Copy HAL[1] : 210mS.
+2023-08-19 00:01:15,356 [INFO] ProjectBuilder:4304 - Project Generator version: 3.19.2
+2023-08-19 00:01:15,684 [INFO] ConfigFileManager:1483 - The Die is : DIE410
+2023-08-19 00:01:15,729 [INFO] ApiDbMcu:507 - Load IP Config File for FATFS
+2023-08-19 00:01:15,782 [INFO] ApiDbMcu:507 - Load IP Config File for FREERTOS
+2023-08-19 00:01:15,822 [INFO] ApiDbMcu:507 - Load IP Config File for USB_DEVICE

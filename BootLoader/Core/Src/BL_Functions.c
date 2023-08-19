@@ -5,10 +5,13 @@
  *      Author: Scorpio
  */
 //
-#include "Functions.h"
+#include <BL_Functions.h>
 /* ******************Critical Definition *******************/
 #define APPLICATION_START_MEMORY_ADDRESS		0x8005000
 #define BUS_SIZE_IN_BYTES						4
+#define BOOTLOADER_START_MEMORY_ADDRESS			0x8000000
+
+
 
 void ToggleTestLed(void)
 {
@@ -27,4 +30,21 @@ void GoToApplication(void)
 	 * same stack hence, the same stack pointer and it is already initialized by HW in ARM
 	 */
 	ResetHandlerAPP();
+}
+
+
+uint8_t CheckIfAppCorupted(void)
+{
+	uint32_t PtrToSpOfAPP = (* (uint32_t *) APPLICATION_START_MEMORY_ADDRESS ) ;
+	uint32_t PtrToSpOfBL = (* (uint32_t *) BOOTLOADER_START_MEMORY_ADDRESS ) ;
+
+	if (PtrToSpOfAPP == PtrToSpOfBL)
+	{
+		/* There is a APP region as there is SP in the start of the APP memory address */
+		return TRUE;
+	}
+	else
+	{
+		return FALSE;
+	}
 }

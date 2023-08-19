@@ -5,7 +5,7 @@
  *      Author: Scorpio
  */
 //
-#include "Functions.h"
+#include <APP_Functions.h>
 /* ******************Critical Definition *******************/
 #define APPLICATION_START_MEMORY_ADDRESS		0x8030000
 #define BUS_SIZE_IN_BYTES						4

@@ -53,3 +53,4 @@ dkms.conf
 **/metadata/*
 /.metadata/
 /BootLoader/Debug
+/Application/Debug

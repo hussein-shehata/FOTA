@@ -5,15 +5,16 @@
  *      Author: Scorpio
  */
 
-#ifndef INC_FUNCTIONS_H_
-#define INC_FUNCTIONS_H_
+#ifndef INC_APP_FUNCTIONS_H_
+#define INC_APP_FUNCTIONS_H_
 
 #include "stm32f1xx_hal.h"
 
 void GoToApplication(void);
+void GoToBootLoader(void);
 void ToggleTestLed(void);
 void PrintHelloScreen(void);
-void DownloadNewSoftware(void);
+void RequestNewSoftware(void);
 uint8_t CheckIfAppCorupted(void);
 
-#endif /* INC_FUNCTIONS_H_ */
+#endif /* INC_APP_FUNCTIONS_H_ */

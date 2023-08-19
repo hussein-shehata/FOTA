@@ -14,10 +14,11 @@
 #define TRUE	 1
 #define FALSE	 0
 
+//#define SHARED_API		__attribute__((section(".API_SHARED_Section")))
 
 void GoToApplication(void);
-void ToggleTestLed(void);
-void PrintHelloScreen(void);
+//void SHARED_API ToggleTestLed(void);
+//void PrintHelloScreen(void);
 void DownloadNewSoftware(void);
 uint8_t CheckIfAppCorupted(void);
 

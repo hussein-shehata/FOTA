@@ -17,7 +17,7 @@
   */
 /* USER CODE END Header */
 /* Includes ------------------------------------------------------------------*/
-#include <APP_Functions.h>
+#include "APP_Functions.h"
 #include "main.h"
 
 /* Private includes ----------------------------------------------------------*/

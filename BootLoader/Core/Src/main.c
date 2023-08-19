@@ -17,12 +17,13 @@
   */
 /* USER CODE END Header */
 /* Includes ------------------------------------------------------------------*/
-#include <BL_Functions.h>
 #include "main.h"
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 #include <stdio.h>
+#include "BL_Functions.h"
+#include "SharedAPIs.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -92,6 +93,7 @@ int main(void)
   MX_USART1_UART_Init();
   /* USER CODE BEGIN 2 */
   printf("Starting BootLoader (%d.%d)\n",BL_Version[0],BL_Version[1]);
+  InitSharedAPIs();
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -99,8 +101,11 @@ int main(void)
   while (1)
   {
     /* USER CODE END WHILE */
-	  ToggleTestLed();
+	  SharedAPIs.ToggleLed.SourceCalling = FROM_BOOTLOADER;
+	  SharedAPIs.ToggleLed.PtrFunction();
 	  HAL_Delay(1000);
+	  SharedAPIs.PrintHelloScreen.SourceCalling = FROM_BOOTLOADER;
+	  SharedAPIs.PrintHelloScreen.PtrFunction();
     /* USER CODE BEGIN 3 */
   }
   /* USER CODE END 3 */

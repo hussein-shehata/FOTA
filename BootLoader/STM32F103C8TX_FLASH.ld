@@ -45,7 +45,8 @@ _Min_Stack_Size = 0x400; /* required amount of stack */
 MEMORY
 {
   RAM    (xrw)    : ORIGIN = 0x20000000,   LENGTH = 20K
-  FLASH    (rx)    : ORIGIN = 0x8000000,   LENGTH = 20K		/*Bootloader Flash Size */
+  FLASH    (rx)    : ORIGIN = 0x8000000,   LENGTH = 15K		/*Bootloader Flash Size */
+  SharedAPIs    (rx)    : ORIGIN = 0x8003C00,   LENGTH = 5K	/*SharedAPIs Flash Size */
 }
 
 /* Sections */
@@ -75,7 +76,20 @@ SECTIONS
     . = ALIGN(4);
     _etext = .;        /* define a global symbols at end of code */
   } >FLASH
-
+  
+  /*My Shared APIs Section */
+  .API_SHARED_Section 0x8003C00:
+  {
+  . = ALIGN(4);
+  __API_SHARED_Section_start__ = .;
+  *(.API_SHARED_Section*)
+  KEEP(*(.API_SHARED))
+  __API_SHARED_Section_end__ = .;
+	} > SharedAPIs
+	
+	/*check if MY_MEMORY usage exceeds MY_MEMORY size */
+	ASSERT(LENGTH(SharedAPIs) >= (__API_SHARED_Section_end__ - __API_SHARED_Section_start__), "SharedAPIs memory overflowed !")
+	
   /* Constant data into "FLASH" Rom type memory */
   .rodata :
   {

@@ -16,6 +16,7 @@
 
 //#define SHARED_API		__attribute__((section(".API_SHARED_Section")))
 
+
 void GoToApplication(void);
 //void SHARED_API ToggleTestLed(void);
 //void PrintHelloScreen(void);

@@ -6,6 +6,7 @@
  */
 //
 #include <BL_Functions.h>
+#include "Print.h"
 /* ******************Critical Definition *******************/
 #define APPLICATION_START_MEMORY_ADDRESS		0x8005000
 #define BUS_SIZE_IN_BYTES						4

@@ -46,7 +46,8 @@ MEMORY
 {
   RAM    (xrw)    : ORIGIN = 0x20000000,   LENGTH = 20K
   FLASH    (rx)    : ORIGIN = 0x8000000,   LENGTH = 15K		/*Bootloader Flash Size */
-  SharedAPIs    (rx)    : ORIGIN = 0x8003C00,   LENGTH = 5K	/*SharedAPIs Flash Size */
+  SharedAPIs    (rx)    : ORIGIN = 0x8003C00,   LENGTH = 4K	/*SharedAPIs Flash Size */
+  NVM_Varaibles    (xrw)    : ORIGIN = 0x8004C00,   LENGTH = 1K	/*NVM Flash Size */
 }
 
 /* Sections */
@@ -82,13 +83,22 @@ SECTIONS
   {
   . = ALIGN(4);
   __API_SHARED_Section_start__ = .;
-  *(.API_SHARED_Section*)
-  KEEP(*(.API_SHARED))
+  *(.API_SHARED_FuncSection*)
+  KEEP(*(.API_SHARED_Variables))
   __API_SHARED_Section_end__ = .;
 	} > SharedAPIs
 	
 	/*check if MY_MEMORY usage exceeds MY_MEMORY size */
 	ASSERT(LENGTH(SharedAPIs) >= (__API_SHARED_Section_end__ - __API_SHARED_Section_start__), "SharedAPIs memory overflowed !")
+	
+  /*My Shared APIs Section */
+  .NVM_Section 0x8004C00:
+  {
+  . = ALIGN(4);
+  __NVM_Section_start__ = .;
+  *(.NVM*)
+  KEEP(*(.NVM))
+	} > NVM_Varaibles
 	
   /* Constant data into "FLASH" Rom type memory */
   .rodata :

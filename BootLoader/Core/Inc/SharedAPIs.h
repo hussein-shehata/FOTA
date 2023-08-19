@@ -34,7 +34,7 @@ typedef struct
 
 
 
-#define LOCATE_SHARED_API		__attribute__((section(".API_SHARED_Section")))
+#define LOCATE_SHARED_API		__attribute__((section(".API_SHARED_FuncSection")))
 
 extern APIs SharedAPIs ;
 

@@ -24,6 +24,8 @@
 #include <stdio.h>
 #include "BL_Functions.h"
 #include "SharedAPIs.h"
+#include "Print.h"
+#include "NVM_Functions.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -35,6 +37,9 @@ typedef uint8_t	uint8;
 /* USER CODE BEGIN PD */
 #define 	MAJOR_VERSION		0
 #define 	MINOR_VERSION		1
+
+#define 	JUST_FLASHED_4BYTES		0xAAAAAAAA
+
 /* USER CODE END PD */
 
 /* Private macro -------------------------------------------------------------*/
@@ -60,6 +65,7 @@ static void MX_USART1_UART_Init(void);
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
 
+NVM_VARIABLE(uint32_t,Counter) = 0;
 /* USER CODE END 0 */
 
 /**
@@ -69,7 +75,25 @@ static void MX_USART1_UART_Init(void);
 int main(void)
 {
   /* USER CODE BEGIN 1 */
+//	BlockIDs NVM_Blocks;
+	uint32_t* u32_Data = 0;
+	NVM_ReadBlock(JustFlashed, u32_Data);
 
+	if (*u32_Data != JUST_FLASHED_4BYTES)
+	{
+		/* This Software has just been Flashed */
+		NVM_WriteBlock(JustFlashed,(uint32_t*) JUST_FLASHED_4BYTES);
+		NVM_WriteBlock(BootCounter,(uint32_t*) 1);
+		/* w hna n3ml flash l el Application software */
+	}
+	else
+	{
+		uint32_t* BootCounterFromNVM = 0;
+		NVM_ReadBlock(BootCounter, BootCounterFromNVM);
+
+		NVM_WriteBlock(BootCounter,(uint32_t*) BootCounterFromNVM + 1);
+		printf("this is the Boot Number = %ul",*BootCounterFromNVM);
+	}
   /* USER CODE END 1 */
 
   /* MCU Configuration--------------------------------------------------------*/
@@ -93,6 +117,10 @@ int main(void)
   MX_USART1_UART_Init();
   /* USER CODE BEGIN 2 */
   printf("Starting BootLoader (%d.%d)\n",BL_Version[0],BL_Version[1]);
+
+  /* TODO ****************e3ml watch 3la el variable dah w et2kd en hwa awl haga fe el nvm variables f3ln */
+  uint32_t* BootCounter = ( (uint32_t*) __NVM_Section_start__ );
+  printf("this is the Boot Number = %ul",*BootCounter);
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -220,20 +248,20 @@ static void MX_GPIO_Init(void)
 }
 
 /* USER CODE BEGIN 4 */
-#ifdef __GNUC__
-  /* With GCC, small printf (option LD Linker->Libraries->Small printf
-     set to 'Yes') calls __io_putchar() */
-int __io_putchar(int ch)
-#else
-int fputc(int ch, FILE *f)
-#endif /* __GNUC__ */
-{
-  /* Place your implementation of fputc here */
-  /* e.g. write a character to the UART3 and Loop until the end of transmission */
-  HAL_UART_Transmit(&huart1, (uint8_t *)&ch, 1, HAL_MAX_DELAY);
-
-  return ch;
-}
+//#ifdef __GNUC__
+//  /* With GCC, small printf (option LD Linker->Libraries->Small printf
+//     set to 'Yes') calls __io_putchar() */
+//int __io_putchar(int ch)
+//#else
+//int fputc(int ch, FILE *f)
+//#endif /* __GNUC__ */
+//{
+//  /* Place your implementation of fputc here */
+//  /* e.g. write a character to the UART3 and Loop until the end of transmission */
+//  HAL_UART_Transmit(&huart1, (uint8_t *)&ch, 1, HAL_MAX_DELAY);
+//
+//  return ch;
+//}
 
 /* USER CODE END 4 */
 

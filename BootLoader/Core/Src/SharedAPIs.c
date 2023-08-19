@@ -6,12 +6,12 @@
  */
 
 #include "SharedAPIs.h"
-
+#include "Print.h"
 
 
 /* Initialize  the Members of the structure here not in a function to optimize memory */
 
-APIs SharedAPIs __attribute__((section(".API_SHARED"))) ={
+APIs SharedAPIs __attribute__((section(".API_SHARED_Variables"))) ={
 		.PrintHelloScreen.SourceCalling = FROM_UNKNOWN_SOURCE,
 		.PrintHelloScreen.PtrFunction = &PrintHelloScreen,
 		.ToggleLed.SourceCalling = FROM_UNKNOWN_SOURCE,
@@ -32,13 +32,16 @@ void LOCATE_SHARED_API PrintHelloScreen(void)
 	if (SharedAPIs.PrintHelloScreen.SourceCalling == FROM_BOOTLOADER)
 	{
 		/*print hello from Bootloader*/
+		printf("Hello From Bootloader");
 	}
 	else if (SharedAPIs.PrintHelloScreen.SourceCalling == FROM_APPLICATION)
 	{
 		/*print hello from Application*/
+		printf("Hello From Application");
 	}
 	else
 	{
 		/*print invalid source calling */
+		printf("Invalid Source Calling");
 	}
 }

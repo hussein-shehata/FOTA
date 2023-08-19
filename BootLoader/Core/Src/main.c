@@ -93,7 +93,6 @@ int main(void)
   MX_USART1_UART_Init();
   /* USER CODE BEGIN 2 */
   printf("Starting BootLoader (%d.%d)\n",BL_Version[0],BL_Version[1]);
-  InitSharedAPIs();
   /* USER CODE END 2 */
 
   /* Infinite loop */

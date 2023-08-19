@@ -9,28 +9,16 @@
 
 
 
+/* Initialize  the Members of the structure here not in a function to optimize memory */
 
-APIs SharedAPIs __attribute__((section(".API_SHARED"))) ;
+APIs SharedAPIs __attribute__((section(".API_SHARED"))) ={
+		.PrintHelloScreen.SourceCalling = FROM_UNKNOWN_SOURCE,
+		.PrintHelloScreen.PtrFunction = &PrintHelloScreen,
+		.ToggleLed.SourceCalling = FROM_UNKNOWN_SOURCE,
+		.ToggleLed.PtrFunction = &ToggleTestLed
 
+};
 
-
-void InitSharedAPIs(void)
-{
-	SharedAPIs.PrintHelloScreen.SourceCalling = FROM_UNKNOWN_SOURCE;
-	SharedAPIs.PrintHelloScreen.PtrFunction = &PrintHelloScreen;
-
-	SharedAPIs.ToggleLed.SourceCalling = FROM_UNKNOWN_SOURCE;
-	SharedAPIs.ToggleLed.PtrFunction = &ToggleTestLed;
-}
-
-//API SharedAPIs[2] =
-//{
-//
-//	FROM_UNKNOWN_SOURCE, &ToggleTestLed,
-//
-//	FROM_UNKNOWN_SOURCE, &PrintHelloScreen
-//
-//};
 
 
 void LOCATE_SHARED_API ToggleTestLed(void)

@@ -10,7 +10,6 @@
 
 #include "stm32f1xx_hal.h"
 
-#define 	NUMBER_OF_SHARED_APIS		2
 
 typedef enum{
 	FROM_BOOTLOADER,
@@ -18,12 +17,14 @@ typedef enum{
 	FROM_UNKNOWN_SOURCE
 }SourceCallingEnum;
 
+
 typedef struct
 {
 	SourceCallingEnum SourceCalling;
 	void (*PtrFunction) (void);
 }API;
 
+/* Put Here the Shared APIs name and edit them in the .c File to initialize them */
 typedef struct
 {
 	API ToggleLed;

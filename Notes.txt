@@ -12,3 +12,5 @@ dah t2dr t2ol 3leh el final project isa
 
 w t2dr t3ml save l hgat fe el flash memory bs fe section kda esmo configuration
 ht3ml save feh l eh sbb el reset w a5r mra enta 3mlt flash l version eh
+w momken t7ot el nvm_write w el read fe el shared APIs bs lazm tt2kd enhm sh8alen sa7 w t3od tdebug 3shan tzbotha
+w t3ml write l el app counter bardo 

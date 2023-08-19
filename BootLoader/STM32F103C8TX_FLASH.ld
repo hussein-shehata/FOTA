@@ -91,7 +91,7 @@ SECTIONS
 	/*check if MY_MEMORY usage exceeds MY_MEMORY size */
 	ASSERT(LENGTH(SharedAPIs) >= (__API_SHARED_Section_end__ - __API_SHARED_Section_start__), "SharedAPIs memory overflowed !")
 	
-  /*My Shared APIs Section */
+  /*My NVM Section */
   .NVM_Section 0x8004C00:
   {
   . = ALIGN(4);

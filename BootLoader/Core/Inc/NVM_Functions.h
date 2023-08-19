@@ -12,7 +12,7 @@
 
 #define 	NVM_VARIABLE(VarType,VarName)	VarType VarName __attribute__((section(".NVM")))
 
-#define 	NVM_BLOCKS_NUMBER			2
+#define 	NVM_BLOCKS_NUMBER			3
 
 extern  const uint32_t  __NVM_Section_start__ ;
 
@@ -21,7 +21,8 @@ extern  const uint32_t  __NVM_Section_start__ ;
 typedef enum
 {
 	JustFlashed,
-	BootCounter
+	BootCounter,
+	AppCounter
 }BlockIDs;
 
 

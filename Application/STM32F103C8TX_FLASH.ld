@@ -91,6 +91,14 @@ SECTIONS
 	/*check if MY_MEMORY usage exceeds MY_MEMORY size */
 	ASSERT(LENGTH(SharedAPIs) >= (__API_SHARED_Section_end__ - __API_SHARED_Section_start__), "SharedAPIs memory overflowed !")
 	
+    /*My NVM Section */
+  .NVM_Section 0x8004C00:
+  {
+  . = ALIGN(4);
+  __NVM_Section_start__ = .;
+  *(.NVM*)
+  KEEP(*(.NVM))
+	} > NVM_Varaibles
   /* Constant data into "FLASH" Rom type memory */
   .rodata :
   {

@@ -27,13 +27,14 @@
 
 /* Private typedef -----------------------------------------------------------*/
 /* USER CODE BEGIN PTD */
-typedef uint8_t	uint8;
+
 /* USER CODE END PTD */
 
 /* Private define ------------------------------------------------------------*/
 /* USER CODE BEGIN PD */
 #define 	MAJOR_VERSION		0
 #define 	MINOR_VERSION		1
+/* USER CODE END PD */
 /* USER CODE END PD */
 
 /* Private macro -------------------------------------------------------------*/
@@ -45,7 +46,7 @@ typedef uint8_t	uint8;
 UART_HandleTypeDef huart1;
 
 /* USER CODE BEGIN PV */
-const uint8 BL_Version[2] = {MAJOR_VERSION, MINOR_VERSION};
+const uint8_t APP_Version[2] = {MAJOR_VERSION, MINOR_VERSION};
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -84,14 +85,15 @@ int main(void)
   SystemClock_Config();
 
   /* USER CODE BEGIN SysInit */
-	HAL_GPIO_TogglePin(GPIOC, GPIO_PIN_13);
+
   /* USER CODE END SysInit */
 
   /* Initialize all configured peripherals */
   MX_GPIO_Init();
   MX_USART1_UART_Init();
   /* USER CODE BEGIN 2 */
-  printf("Starting BootLoader (%d.%d)\n",BL_Version[0],BL_Version[1]);
+  printf("Starting Application (%d.%d)\n",APP_Version[0],APP_Version[1]);
+  HAL_GPIO_WritePin(GPIOC, GPIO_PIN_13,GPIO_PIN_RESET);
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -100,7 +102,7 @@ int main(void)
   {
     /* USER CODE END WHILE */
 	  ToggleTestLed();
-	  HAL_Delay(1000);
+	  HAL_Delay(3000);
     /* USER CODE BEGIN 3 */
   }
   /* USER CODE END 3 */
@@ -219,7 +221,6 @@ int fputc(int ch, FILE *f)
 
   return ch;
 }
-
 /* USER CODE END 4 */
 
 /**

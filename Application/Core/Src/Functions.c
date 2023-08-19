@@ -7,7 +7,7 @@
 //
 #include "Functions.h"
 /* ******************Critical Definition *******************/
-#define APPLICATION_START_MEMORY_ADDRESS		0x8005000
+#define APPLICATION_START_MEMORY_ADDRESS		0x8030000
 #define BUS_SIZE_IN_BYTES						4
 
 void ToggleTestLed(void)

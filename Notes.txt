@@ -1,1 +1,8 @@
 Lazm a8ir el boot mode a5leh flash memory 3shan el system memory bib2a feh el bootloader bta3 ST nfsha f msh 3aiz abzwo
+
+5ly balk mn enk t2rbn ht5ly el bootloader bta3 el system hwa ely ysht8l w2t el flashing 3shan t3rf tn2l el hex file
+w b3dha el bootloader bta3k ely hwa el application blnsba l el built in boatloader hi2om w hwa ely yhs8l el application bta3k nfso
+
+
+3aiz t3ml bardo 2 applications w el bootloader y3ml jump 3la wahd mnhm 3la 7sb enta 3aiz eh
+https://www.youtube.com/watch?v=S0s69xNE1dE&ab_channel=ViktorVano

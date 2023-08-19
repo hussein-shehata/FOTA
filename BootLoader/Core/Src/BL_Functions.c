@@ -35,10 +35,10 @@ uint8_t CheckIfAppCorupted(void)
 	if (PtrToSpOfAPP == PtrToSpOfBL)
 	{
 		/* There is a APP region as there is SP in the start of the APP memory address */
-		return TRUE;
+		return FALSE;
 	}
 	else
 	{
-		return FALSE;
+		return TRUE;
 	}
 }

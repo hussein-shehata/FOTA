@@ -99,12 +99,23 @@ int main(void)
   /* USER CODE BEGIN WHILE */
   while (1)
   {
-    /* USER CODE END WHILE */
 	  SharedAPIs.ToggleLed.SourceCalling = FROM_BOOTLOADER;
 	  SharedAPIs.ToggleLed.PtrFunction();
 	  HAL_Delay(1000);
 	  SharedAPIs.PrintHelloScreen.SourceCalling = FROM_BOOTLOADER;
 	  SharedAPIs.PrintHelloScreen.PtrFunction();
+
+	  uint8_t res = CheckIfAppCorupted();
+	  if (res == FALSE)
+	  {
+		  GoToApplication();
+	  }
+	  else
+	  {
+		  //do nothing
+	  }
+    /* USER CODE END WHILE */
+
     /* USER CODE BEGIN 3 */
   }
   /* USER CODE END 3 */

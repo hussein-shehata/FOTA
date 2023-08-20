@@ -76,6 +76,7 @@ int main(void)
 {
   /* USER CODE BEGIN 1 */
 //	BlockIDs NVM_Blocks;
+#ifdef NVM_TEST
 	uint32_t* u32_Data = 0;
 	NVM_ReadBlock(JustFlashed, u32_Data);
 
@@ -94,6 +95,7 @@ int main(void)
 		NVM_WriteBlock(BootCounter,(uint32_t*) BootCounterFromNVM + 1);
 		printf("this is the Boot Number = %ul",*BootCounterFromNVM);
 	}
+#endif
   /* USER CODE END 1 */
 
   /* MCU Configuration--------------------------------------------------------*/
@@ -121,21 +123,27 @@ int main(void)
   /* TODO ****************e3ml watch 3la el variable dah w et2kd en hwa awl haga fe el nvm variables f3ln */
   uint32_t* BootCounter = ( (uint32_t*) __NVM_Section_start__ );
   printf("this is the Boot Number = %ul",*BootCounter);
+
+	uint8_t Counter =0;
   /* USER CODE END 2 */
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
   while (1)
   {
-	  SharedAPIs.ToggleLed.SourceCalling = FROM_BOOTLOADER;
-	  SharedAPIs.ToggleLed.PtrFunction();
+//	  SharedAPIs.ToggleLed.SourceCalling = FROM_BOOTLOADER;
+//	  SharedAPIs.ToggleLed.PtrFunction();
 	  HAL_Delay(1000);
-	  SharedAPIs.PrintHelloScreen.SourceCalling = FROM_BOOTLOADER;
-	  SharedAPIs.PrintHelloScreen.PtrFunction();
+//	  SharedAPIs.PrintHelloScreen.SourceCalling = FROM_BOOTLOADER;
+//	  SharedAPIs.PrintHelloScreen.PtrFunction();
 
+		HAL_GPIO_TogglePin(GPIOC, GPIO_PIN_13);
+		Counter ++;
 	  uint8_t res = CheckIfAppCorupted();
-	  if (res == FALSE)
+	  if (res == FALSE && Counter > 3)
 	  {
+////			__set_MSP(*(uint32_t *)FLASH_APP_ADDR);
+
 		  GoToApplication();
 	  }
 	  else

@@ -94,6 +94,7 @@ int main(void)
   /* USER CODE BEGIN 2 */
   printf("Starting Application (%d.%d)\n",APP_Version[0],APP_Version[1]);
   HAL_GPIO_WritePin(GPIOC, GPIO_PIN_13,GPIO_PIN_RESET);
+  HAL_Delay(5000);
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -101,8 +102,10 @@ int main(void)
   while (1)
   {
     /* USER CODE END WHILE */
+//	  HAL_GPIO_WritePin(GPIOC, GPIO_PIN_13,GPIO_PIN_RESET);
+
 	  ToggleTestLed();
-	  HAL_Delay(3000);
+	  HAL_Delay(5000);
     /* USER CODE BEGIN 3 */
   }
   /* USER CODE END 3 */

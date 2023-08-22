@@ -16,7 +16,7 @@
 
 extern  const uint32_t  __NVM_Section_start__ ;
 
-#define 	NVM_START_ADDRESS		0x8004C00
+#define 	NVM_START_ADDRESS		0x800EC00
 
 typedef enum
 {

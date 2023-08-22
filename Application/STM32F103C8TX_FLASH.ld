@@ -45,9 +45,9 @@ _Min_Stack_Size = 0x400; /* required amount of stack */
 MEMORY
 {
   RAM    (xrw)    : ORIGIN = 0x20000000,   LENGTH = 20K
-  FLASH    (rx)    : ORIGIN = 0x8005000,   LENGTH = 40K
+  FLASH    (rx)    : ORIGIN = 0x8005000,   LENGTH = 39K
   SharedAPIs    (rx)    : ORIGIN = 0x8003C00,   LENGTH = 4K	/*SharedAPIs Flash Size */
-  NVM_Varaibles    (xrw)    : ORIGIN = 0x8004C00,   LENGTH = 1K	/*NVM Flash Size */
+  NVM_Varaibles    (xrw)    : ORIGIN = 0x800EC00,   LENGTH = 1K	/*NVM Flash Size */
 }
 
 /* Sections */
@@ -92,7 +92,7 @@ SECTIONS
 	ASSERT(LENGTH(SharedAPIs) >= (__API_SHARED_Section_end__ - __API_SHARED_Section_start__), "SharedAPIs memory overflowed !")
 	
     /*My NVM Section */
-  .NVM_Section 0x8004C00:
+  .NVM_Section 0x800EC00:
   {
   . = ALIGN(4);
   __NVM_Section_start__ = .;

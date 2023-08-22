@@ -26,6 +26,7 @@
 #include "SharedAPIs.h"
 #include "Print.h"
 #include "NVM_Functions.h"
+#include "Flash.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -75,6 +76,7 @@ NVM_VARIABLE(uint32_t,Counter) = 0;
 int main(void)
 {
   /* USER CODE BEGIN 1 */
+#define NVM_TESTs
 //	BlockIDs NVM_Blocks;
 #ifdef NVM_TEST
 	uint32_t* u32_Data = 0;
@@ -121,10 +123,9 @@ int main(void)
   printf("Starting BootLoader (%d.%d)\n",BL_Version[0],BL_Version[1]);
 
   /* TODO ****************e3ml watch 3la el variable dah w et2kd en hwa awl haga fe el nvm variables f3ln */
-  uint32_t* BootCounter = ( (uint32_t*) __NVM_Section_start__ );
-  printf("this is the Boot Number = %ul",*BootCounter);
+//  uint32_t* BootCounter = ( (uint32_t*) __NVM_Section_start__ );
+//  printf("this is the Boot Number = %ul",*BootCounter);
 
-	uint8_t Counter =0;
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -139,6 +140,26 @@ int main(void)
 
 		HAL_GPIO_TogglePin(GPIOC, GPIO_PIN_13);
 		Counter ++;
+		u32 address = 0x800EC08;
+		u32* ptr = 0x800EC08;
+		uint8_t status;
+		uint8_t EnterOnce = 1;
+		if(EnterOnce == 0)
+		{
+		status = FLASH_Unlock();
+		status = FLASH_MultiplePageErase(address,1);
+		status = FLASH_WriteWord((u32*)address,0x55555555);
+		EnterOnce = 1;
+		}
+		if(*ptr == 0x55555555)
+		{
+			HAL_Delay(5000);
+			HAL_GPIO_TogglePin(GPIOC, GPIO_PIN_13);
+			while(1);
+		}
+//		NVM_WriteBlock(0, (uint32_t*) JUST_FLASHED_4BYTES);
+//		ptrFunction = (uint32_t*) 0x8002A30;
+//		ptrFunction(0, (uint32_t*) JUST_FLASHED_4BYTES);
 	  uint8_t res = CheckIfAppCorupted();
 	  if (res == FALSE && Counter > 3)
 	  {

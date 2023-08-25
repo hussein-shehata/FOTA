@@ -24,9 +24,10 @@
 #include <stdio.h>
 #include "BL_Functions.h"
 #include "SharedAPIs.h"
-#include "Print.h"
+//#include "Print.h"
 #include "NVM_Functions.h"
 #include "Flash.h"
+#include "NVM.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -37,7 +38,7 @@ typedef uint8_t	uint8;
 /* Private define ------------------------------------------------------------*/
 /* USER CODE BEGIN PD */
 #define 	MAJOR_VERSION		0
-#define 	MINOR_VERSION		1
+#define 	MINOR_VERSION		5
 
 #define 	JUST_FLASHED_4BYTES		0xAAAAAAAA
 
@@ -66,7 +67,7 @@ static void MX_USART1_UART_Init(void);
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
 
-NVM_VARIABLE(uint32_t,Counter) = 0;
+//NVM_VARIABLE(uint32_t,Counter) = 0;
 /* USER CODE END 0 */
 
 /**
@@ -113,18 +114,60 @@ int main(void)
   SystemClock_Config();
 
   /* USER CODE BEGIN SysInit */
-	HAL_GPIO_TogglePin(GPIOC, GPIO_PIN_13);
+//	HAL_GPIO_TogglePin(GPIOC, GPIO_PIN_13);
   /* USER CODE END SysInit */
 
   /* Initialize all configured peripherals */
   MX_GPIO_Init();
   MX_USART1_UART_Init();
   /* USER CODE BEGIN 2 */
-  printf("Starting BootLoader (%d.%d)\n",BL_Version[0],BL_Version[1]);
+  printf("Starting BootLoader (%d.%d)\r\n",BL_Version[0],BL_Version[1]);
+//  HAL_GPIO_WritePin(GPIOA, GPIO_PIN_7,GPIO_PIN_SET);
 
   /* TODO ****************e3ml watch 3la el variable dah w et2kd en hwa awl haga fe el nvm variables f3ln */
 //  uint32_t* BootCounter = ( (uint32_t*) __NVM_Section_start__ );
 //  printf("this is the Boot Number = %ul",*BootCounter);
+
+
+	uint8_t Status;
+	uint32_t DataToBeWritten = 0xAABBCCDD;
+	uint32_t DataBuffer;
+	uint32_t* BootCounterAddress = NVM_START_ADDRESS + 0x4*1;
+	uint8_t EnterOnce = 1;
+
+
+	/***********************************VIP***********************/
+
+	/************Block el code ely t7t dah bigeb run time error m3rfsh leh
+	 * bs ama nzlto t7t hwa hwa 7rfin sh8al sa7
+	 */
+
+//	NVM_ReadAddress(BootCounter, &DataBuffer);
+//	if (DataBuffer == 0xFFFFFFFF)
+//	{
+//		/* This is the first time boot */
+//		DataToBeWritten = 0;
+//		Status = FlashUnlock();
+//		Status = NVM_WriteAddress(BootCounter, &DataToBeWritten);
+//		FlashLock();
+//	}
+//	else
+//	{
+//		DataToBeWritten = DataBuffer + 1;
+//		Status = FlashUnlock();
+//		Status = NVM_ErasePage(NVM_START_ADDRESS);
+//		Status = NVM_OverWriteAddress(BootCounter, &DataToBeWritten);
+//		Status = FlashUnlock();
+//	}
+
+	if ( *BootCounterAddress == 0xFFFFFFFF)
+	{
+		printf("this is the Boot Number = %u \r\n", 0);
+	}
+	else
+	{
+		printf("this is the Boot Number = %u \r\n",*BootCounterAddress);
+	}
 
   /* USER CODE END 2 */
 
@@ -132,36 +175,83 @@ int main(void)
   /* USER CODE BEGIN WHILE */
   while (1)
   {
+	  printf("Welcome To main\r\n");
+
 //	  SharedAPIs.ToggleLed.SourceCalling = FROM_BOOTLOADER;
 //	  SharedAPIs.ToggleLed.PtrFunction();
-	  HAL_Delay(1000);
+	  HAL_Delay(100);
 //	  SharedAPIs.PrintHelloScreen.SourceCalling = FROM_BOOTLOADER;
 //	  SharedAPIs.PrintHelloScreen.PtrFunction();
 
-		HAL_GPIO_TogglePin(GPIOC, GPIO_PIN_13);
-		Counter ++;
-		u32 address = 0x800EC08;
-		u32* ptr = 0x800EC08;
-		uint8_t status;
-		uint8_t EnterOnce = 1;
-		if(EnterOnce == 0)
+//		Counter ++;
+//		u32 address = 0x800EC08;
+//		u32* ptr = 0x800EC08;
+//		u32* BootCounter = 0x800EC04;
+//		u32* BootCounterAddress = 0x800EC04;
+		uint8_t Status;
+		uint32_t DataToBeWritten = 0xAABBCCDD;
+		uint32_t DataBuffer;
+#ifdef GITHUB_FLASH
+
+		if (*ptr != 0x55555555)
 		{
-		status = FLASH_Unlock();
-		status = FLASH_MultiplePageErase(address,1);
-		status = FLASH_WriteWord((u32*)address,0x55555555);
-		EnterOnce = 1;
+			/* we have just flashed */
+			status = FLASH_Unlock();
+			status = FLASH_MultiplePageErase(address,1);
+			status = FLASH_WriteWord((u32*)address,0x55555555);
+
+			status = FLASH_WriteWord((u32*)BootCounterAddress,0);
+			HAL_GPIO_WritePin(GPIOC, GPIO_PIN_13,GPIO_PIN_SET);
+			printf("We didnot Found the Saved Address\r\n");
 		}
-		if(*ptr == 0x55555555)
+		else
 		{
-			HAL_Delay(5000);
-			HAL_GPIO_TogglePin(GPIOC, GPIO_PIN_13);
-			while(1);
+			uint32_t Counter = *BootCounter;
+			Counter = Counter + 1;
+		status = FLASH_WriteWord((u32*)BootCounterAddress,Counter);
+		printf("We Booted This Software %d Times\r\n", Counter);
 		}
+#else
+
+		Status = FlashUnlock();
+		Status = NVM_WriteAddress(AppCounter, &DataToBeWritten);
+		FlashLock();
+		HAL_Delay(100);
+		DataToBeWritten = 0x11223344;
+		Status = FlashUnlock();
+		Status = NVM_OverWriteAddress(AppCounter, &DataToBeWritten);
+		FlashLock();
+
+		if(EnterOnce == 1)
+		{
+			EnterOnce = 0;
+			NVM_ReadAddress(BootCounter, &DataBuffer);
+			if (DataBuffer == 0xFFFFFFFF)
+			{
+				/* This is the first time boot */
+				DataToBeWritten = 0;
+				Status = FlashUnlock();
+				Status = NVM_WriteAddress(BootCounter, &DataToBeWritten);
+				FlashLock();
+				printf("I have Wrote zero in the section\r\n");
+			}
+			else
+			{
+				DataToBeWritten = DataBuffer + 1;
+				Status = FlashUnlock();
+				Status = NVM_OverWriteAddress(BootCounter, &DataToBeWritten);
+				Status = FlashUnlock();
+				printf("I have Wrote %d in the Section, we entered the else\r\n",DataToBeWritten);
+			}
+
+		}
+
+#endif
 //		NVM_WriteBlock(0, (uint32_t*) JUST_FLASHED_4BYTES);
 //		ptrFunction = (uint32_t*) 0x8002A30;
 //		ptrFunction(0, (uint32_t*) JUST_FLASHED_4BYTES);
 	  uint8_t res = CheckIfAppCorupted();
-	  if (res == FALSE && Counter > 3)
+	  if (res == FALSE )
 	  {
 ////			__set_MSP(*(uint32_t *)FLASH_APP_ADDR);
 
@@ -193,7 +283,9 @@ void SystemClock_Config(void)
   RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_HSI;
   RCC_OscInitStruct.HSIState = RCC_HSI_ON;
   RCC_OscInitStruct.HSICalibrationValue = RCC_HSICALIBRATION_DEFAULT;
-  RCC_OscInitStruct.PLL.PLLState = RCC_PLL_NONE;
+  RCC_OscInitStruct.PLL.PLLState = RCC_PLL_ON;
+  RCC_OscInitStruct.PLL.PLLSource = RCC_PLLSOURCE_HSI_DIV2;
+  RCC_OscInitStruct.PLL.PLLMUL = RCC_PLL_MUL9;
   if (HAL_RCC_OscConfig(&RCC_OscInitStruct) != HAL_OK)
   {
     Error_Handler();
@@ -203,12 +295,12 @@ void SystemClock_Config(void)
   */
   RCC_ClkInitStruct.ClockType = RCC_CLOCKTYPE_HCLK|RCC_CLOCKTYPE_SYSCLK
                               |RCC_CLOCKTYPE_PCLK1|RCC_CLOCKTYPE_PCLK2;
-  RCC_ClkInitStruct.SYSCLKSource = RCC_SYSCLKSOURCE_HSI;
+  RCC_ClkInitStruct.SYSCLKSource = RCC_SYSCLKSOURCE_PLLCLK;
   RCC_ClkInitStruct.AHBCLKDivider = RCC_SYSCLK_DIV1;
-  RCC_ClkInitStruct.APB1CLKDivider = RCC_HCLK_DIV1;
+  RCC_ClkInitStruct.APB1CLKDivider = RCC_HCLK_DIV2;
   RCC_ClkInitStruct.APB2CLKDivider = RCC_HCLK_DIV1;
 
-  if (HAL_RCC_ClockConfig(&RCC_ClkInitStruct, FLASH_LATENCY_0) != HAL_OK)
+  if (HAL_RCC_ClockConfig(&RCC_ClkInitStruct, FLASH_LATENCY_1) != HAL_OK)
   {
     Error_Handler();
   }
@@ -265,12 +357,22 @@ static void MX_GPIO_Init(void)
   /*Configure GPIO pin Output Level */
   HAL_GPIO_WritePin(GPIOC, GPIO_PIN_13, GPIO_PIN_RESET);
 
+  /*Configure GPIO pin Output Level */
+  HAL_GPIO_WritePin(GPIOA, GPIO_PIN_7, GPIO_PIN_RESET);
+
   /*Configure GPIO pin : PC13 */
   GPIO_InitStruct.Pin = GPIO_PIN_13;
   GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
   HAL_GPIO_Init(GPIOC, &GPIO_InitStruct);
+
+  /*Configure GPIO pin : PA7 */
+  GPIO_InitStruct.Pin = GPIO_PIN_7;
+  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
+  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
+  HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
 
 /* USER CODE BEGIN MX_GPIO_Init_2 */
 /* USER CODE END MX_GPIO_Init_2 */

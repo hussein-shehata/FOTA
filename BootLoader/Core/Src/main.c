@@ -134,6 +134,7 @@ int main(void)
 	uint32_t DataBuffer;
 	uint32_t* BootCounterAddress = NVM_START_ADDRESS + 0x4*1;
 	uint8_t EnterOnce = 1;
+	uint8_t Buffer[100] = {0} ;
 
 
 	/***********************************VIP***********************/
@@ -175,7 +176,11 @@ int main(void)
   /* USER CODE BEGIN WHILE */
   while (1)
   {
-	  printf("Welcome To main\r\n");
+	  while(1)
+	  {
+		  HAL_UART_Receive(&huart1, Buffer, 10, 5000);
+		  printf("We Have received %x Byte \r\n",Buffer[0]);
+	  }
 
 //	  SharedAPIs.ToggleLed.SourceCalling = FROM_BOOTLOADER;
 //	  SharedAPIs.ToggleLed.PtrFunction();

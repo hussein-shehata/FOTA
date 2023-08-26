@@ -204,3 +204,4 @@ uint8_t NVM_ErasePage(uint32_t Starting_Address)
 	CLR_BIT(FLASH_REGISTERS->Flash_CR, 1);
 	return Status ;
 }
+

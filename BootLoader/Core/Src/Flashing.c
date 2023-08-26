@@ -207,7 +207,7 @@ uint8_t OverWritePageFlash(uint32_t StartingAddress, uint32_t* DataBuffer)
 		return Status;
 	}
 	FlashUnlock();
-//	Status = NVM_ErasePage(StartingAddress);
+	Status = Flash_ErasePage(StartingAddress);
 
 	for (uint16_t idx = 0; idx < ETX_OTA_DATA_MAX_SIZE / 4 ; idx++)
 	{
@@ -269,3 +269,35 @@ uint8_t Flash_WriteAddress(uint32_t StartingAddress, uint32_t* DataBuffer)
 }
 
 
+uint8_t Flash_ErasePage(uint32_t StartingAddress)
+{
+	uint32_t Status = ETX_OTA_EX_ERR;
+	/* Wait till the flash memory operation in progress ends */
+	while(GET_BIT(FLASH_REGISTERS->Flash_SR , (uint32_t)1) == 1);
+	FLASH_REGISTERS->Flash_AR = StartingAddress;
+	CLR_BIT(FLASH_REGISTERS->Flash_CR, 0);
+	SET_BIT(FLASH_REGISTERS->Flash_CR, 1);
+	SET_BIT(FLASH_REGISTERS->Flash_CR, 6);
+
+	/* Wait till the flash memory operation in progress ends */
+	while(GET_BIT(FLASH_REGISTERS->Flash_SR , (uint32_t)1) == 1);
+
+	/* Check that the Flash operation is completed by watching the EOP bit in SR register*/
+	while(GET_BIT(FLASH_REGISTERS->Flash_SR , (uint32_t)1) == 5);
+
+	/* Reset the bit by writing 1 to the bit */
+	SET_BIT(FLASH_REGISTERS->Flash_SR , (uint32_t)5);
+
+	/* Check that Erase is successful */
+	uint32_t* CheckPtr = (uint32_t*) StartingAddress;
+	if (*CheckPtr != 0xFFFFFFFF)
+	{
+		Status = ETX_OTA_EX_ERR;
+	}
+	else
+	{
+		Status = ETX_OTA_EX_OK;
+	}
+	CLR_BIT(FLASH_REGISTERS->Flash_CR, 1);
+	return Status ;
+}

@@ -174,15 +174,9 @@ int main(void)
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
-	uint8_t StatusFlashing = FlashApplication();
+//	uint8_t StatusFlashing = FlashApplication();
   while (1)
   {
-	  while(1)
-	  {
-		  HAL_UART_Receive(&huart1, Buffer, 10, 5000);
-		  printf("We Have received %x Byte \r\n",Buffer[0]);
-	  }
-
 //	  SharedAPIs.ToggleLed.SourceCalling = FROM_BOOTLOADER;
 //	  SharedAPIs.ToggleLed.PtrFunction();
 	  HAL_Delay(100);

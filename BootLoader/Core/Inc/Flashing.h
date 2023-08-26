@@ -169,5 +169,6 @@ uint8_t ProcessChunck(uint8_t* Buffer);
 void SendResponseToHost(uint8_t Response);
 uint8_t Flash_WriteAddress(uint32_t StartingAddress, uint32_t* DataBuffer);
 uint8_t OverWritePageFlash(uint32_t StartingAddress, uint32_t* DataBuffer);
+uint8_t Flash_ErasePage(uint32_t StartingAddress);
 
 #endif /* INC_FLASHING_H_ */

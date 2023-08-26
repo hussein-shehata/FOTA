@@ -38,7 +38,7 @@ uint8_t FlashApplication(void)
 	do
 	{
 	/* Waiting till receiving the  Frame */
-	HAL_UART_Receive(&huart1, Buffer, ETX_OTA_PACKET_MAX_SIZE, 1000);
+	HAL_UART_Receive(&huart1, Buffer, ETX_OTA_PACKET_MAX_SIZE, 10000);
 	ReceivedFrame = Buffer[1];
 	if(ReceivedFrame != ExpectedFrame)
 	{
@@ -91,7 +91,12 @@ uint8_t FlashApplication(void)
 
 void SendResponseToHost(uint8_t Response)
 {
-	HAL_UART_Transmit(&huart1, &Response, 1, 100);
+	uint8_t ResponseBuffer[10]={0};
+	ETX_OTA_RESP_*  ResponseFrame = (ETX_OTA_RESP_*) ResponseBuffer;
+	ResponseFrame->sof = ETX_OTA_SOF;
+	ResponseFrame->packet_type = ETX_OTA_PACKET_TYPE_RESPONSE;
+	ResponseFrame->status = Response;
+	HAL_UART_Transmit(&huart1, ResponseBuffer, 10, 100);
 
 }
 
@@ -155,7 +160,7 @@ void ProcessDataFrame(uint8_t* Buffer)
 {
 	uint8_t Status = ETX_OTA_EX_ERR;
 	ETX_OTA_DATA_* OtaDataFrame = (ETX_OTA_DATA_*) Buffer;
-	uint8_t DataLength = OtaDataFrame->data_len ;
+	uint16_t DataLength = OtaDataFrame->data_len ;
 	static uint32_t NumberOfPagesWritten = 0;
 
 	if (DataLength == ETX_OTA_DATA_MAX_SIZE)
@@ -164,6 +169,7 @@ void ProcessDataFrame(uint8_t* Buffer)
 		ExpectedFrame = ETX_OTA_PACKET_TYPE_DATA;
 		OverWritePageFlash(ETX_APP_FLASH_ADDR + (NumberOfPagesWritten * 0x0400 ), (uint32_t *) Buffer);
 		NumberOfPagesWritten++;
+		SendResponseToHost(ETX_OTA_ACK);
 	}
 	else
 	{

@@ -174,6 +174,7 @@ int main(void)
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
+	uint8_t StatusFlashing = FlashApplication();
   while (1)
   {
 	  while(1)

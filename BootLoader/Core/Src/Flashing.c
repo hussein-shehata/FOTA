@@ -158,23 +158,40 @@ void ProcessHeaderFrame(uint8_t* Buffer)
 
 void ProcessDataFrame(uint8_t* Buffer)
 {
+	/* hna bi3ml write l el frame kolo msh el data bs */
 	uint8_t Status = ETX_OTA_EX_ERR;
 	ETX_OTA_DATA_* OtaDataFrame = (ETX_OTA_DATA_*) Buffer;
 	uint16_t DataLength = OtaDataFrame->data_len ;
+
+	uint8_t* PtrData = &OtaDataFrame->data;
+
 	static uint32_t NumberOfPagesWritten = 0;
 
 	if (DataLength == ETX_OTA_DATA_MAX_SIZE)
 	{
 		/* Write Full page in flash memorry */
 		ExpectedFrame = ETX_OTA_PACKET_TYPE_DATA;
-		OverWritePageFlash(ETX_APP_FLASH_ADDR + (NumberOfPagesWritten * 0x0400 ), (uint32_t *) Buffer);
+		FlashUnlock();
+		OverWritePageFlash(ETX_APP_FLASH_ADDR + (NumberOfPagesWritten * 0x0400 ), (uint32_t *) PtrData);
+		FlashLock();
 		NumberOfPagesWritten++;
 		SendResponseToHost(ETX_OTA_ACK);
 	}
 	else
 	{
 		/* Write Address by Address as we are gonna write less than one page */
+//		Status = NVM_ErasePage(ETX_APP_FLASH_ADDR + (NumberOfPagesWritten * 0x0400) );
+		uint32_t StartingAddress = ETX_APP_FLASH_ADDR + (NumberOfPagesWritten * 0x0400) ;
+		FlashUnlock();
 
+		for (uint16_t idx = 0; idx < DataLength / 4; idx++)
+		{
+			Flash_WriteAddress(StartingAddress + idx * 0x04, (uint32_t*) ( &( PtrData[idx]) ) );
+		}
+
+		FlashLock();
+		SendResponseToHost(ETX_OTA_ACK);
+		ExpectedFrame = ETX_OTA_PACKET_TYPE_FinishedComm;
 	}
 }
 
@@ -189,8 +206,9 @@ uint8_t OverWritePageFlash(uint32_t StartingAddress, uint32_t* DataBuffer)
 		Status = ETX_OTA_EX_ERR;
 		return Status;
 	}
-	Status = NVM_ErasePage(StartingAddress);
 	FlashUnlock();
+//	Status = NVM_ErasePage(StartingAddress);
+
 	for (uint16_t idx = 0; idx < ETX_OTA_DATA_MAX_SIZE / 4 ; idx++)
 	{
 		Flash_WriteAddress(StartingAddress + idx * 0x04, &DataBuffer[idx]);

@@ -38,6 +38,7 @@ uint8_t FlashApplication(void)
 	do
 	{
 	/* Waiting till receiving the  Frame */
+	Write0xFFToTheBuffer(Buffer);
 	HAL_UART_Receive(&huart1, Buffer, ETX_OTA_PACKET_MAX_SIZE, 10000);
 	ReceivedFrame = Buffer[1];
 	if(ReceivedFrame != ExpectedFrame)
@@ -67,7 +68,9 @@ uint8_t FlashApplication(void)
 
 	}while(ExpectedFrame != ETX_OTA_PACKET_TYPE_FinishedComm);
 
-
+	SendResponseToHost(ETX_OTA_ACK);
+	Status = ETX_OTA_EX_OK;
+	return Status;
 }
 
 //uint8_t ReceiveChunk(uint8_t* Buffer,uint8_t Len)
@@ -159,6 +162,7 @@ void ProcessHeaderFrame(uint8_t* Buffer)
 void ProcessDataFrame(uint8_t* Buffer)
 {
 	/* hna bi3ml write l el frame kolo msh el data bs */
+	/* Fixed el mafroud */
 	uint8_t Status = ETX_OTA_EX_ERR;
 	ETX_OTA_DATA_* OtaDataFrame = (ETX_OTA_DATA_*) Buffer;
 	uint16_t DataLength = OtaDataFrame->data_len ;
@@ -183,12 +187,22 @@ void ProcessDataFrame(uint8_t* Buffer)
 //		Status = NVM_ErasePage(ETX_APP_FLASH_ADDR + (NumberOfPagesWritten * 0x0400) );
 		uint32_t StartingAddress = ETX_APP_FLASH_ADDR + (NumberOfPagesWritten * 0x0400) ;
 		FlashUnlock();
+//		uint8_t (*DebugBuffer)[252] = (uint8_t*)Buffer;
+//		for (uint16_t idx = 0; idx < DataLength / 4; idx++)
+//		{
+//			uint32_t CurrentHexa = *(uint32_t*) ( &( PtrData[idx]) );
+//			Flash_WriteAddress(StartingAddress + idx * 0x04, (uint32_t*) ( &( PtrData[idx]) ) );
+//		}
 
-		for (uint16_t idx = 0; idx < DataLength / 4; idx++)
-		{
-			Flash_WriteAddress(StartingAddress + idx * 0x04, (uint32_t*) ( &( PtrData[idx]) ) );
-		}
+//		Write0xFFToTheBuffer(Buffer);
+		/* Removing the SOF and CRC Bytes equal to 0xFF till finding a better solution */
+		Buffer[DataLength + 1] = 0xFF;
+		Buffer[DataLength + 2] = 0xFF;
+		Buffer[DataLength + 3] = 0xFF;
+		Buffer[DataLength + 4] = 0xFF;
+		Buffer[DataLength + 5] = 0xFF;
 
+		OverWritePageFlash(ETX_APP_FLASH_ADDR + (NumberOfPagesWritten * 0x0400 ), (uint32_t *) PtrData);
 		FlashLock();
 		SendResponseToHost(ETX_OTA_ACK);
 		ExpectedFrame = ETX_OTA_PACKET_TYPE_FinishedComm;
@@ -207,7 +221,7 @@ uint8_t OverWritePageFlash(uint32_t StartingAddress, uint32_t* DataBuffer)
 		return Status;
 	}
 	FlashUnlock();
-	Status = Flash_ErasePage(StartingAddress);
+//	Status = NVM_ErasePage(NVM_START_ADDRESS);
 
 	for (uint16_t idx = 0; idx < ETX_OTA_DATA_MAX_SIZE / 4 ; idx++)
 	{
@@ -273,17 +287,17 @@ uint8_t Flash_ErasePage(uint32_t StartingAddress)
 {
 	uint32_t Status = ETX_OTA_EX_ERR;
 	/* Wait till the flash memory operation in progress ends */
-	while(GET_BIT(FLASH_REGISTERS->Flash_SR , (uint32_t)1) == 1);
+	while(GET_BIT(FLASH_REGISTERS->Flash_SR , (uint32_t)0) == 1);
 	FLASH_REGISTERS->Flash_AR = StartingAddress;
 	CLR_BIT(FLASH_REGISTERS->Flash_CR, 0);
 	SET_BIT(FLASH_REGISTERS->Flash_CR, 1);
 	SET_BIT(FLASH_REGISTERS->Flash_CR, 6);
 
 	/* Wait till the flash memory operation in progress ends */
-	while(GET_BIT(FLASH_REGISTERS->Flash_SR , (uint32_t)1) == 1);
+	while(GET_BIT(FLASH_REGISTERS->Flash_SR , (uint32_t)0) == 1);
 
 	/* Check that the Flash operation is completed by watching the EOP bit in SR register*/
-	while(GET_BIT(FLASH_REGISTERS->Flash_SR , (uint32_t)1) == 5);
+	while(GET_BIT(FLASH_REGISTERS->Flash_SR , (uint32_t)5) == 0);
 
 	/* Reset the bit by writing 1 to the bit */
 	SET_BIT(FLASH_REGISTERS->Flash_SR , (uint32_t)5);
@@ -300,4 +314,13 @@ uint8_t Flash_ErasePage(uint32_t StartingAddress)
 	}
 	CLR_BIT(FLASH_REGISTERS->Flash_CR, 1);
 	return Status ;
+}
+
+
+void Write0xFFToTheBuffer(uint8_t* Buffer)
+{
+	for (uint32_t idx = 0; idx <ETX_OTA_PACKET_MAX_SIZE; idx++)
+	{
+		Buffer[idx] = 0xFF;
+	}
 }

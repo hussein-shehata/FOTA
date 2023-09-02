@@ -129,7 +129,7 @@ int main(void)
 //  printf("this is the Boot Number = %ul",*BootCounter);
 
 
-	uint8_t Status;
+//	uint8_t Status;
 	uint32_t DataToBeWritten = 0xAABBCCDD;
 	uint32_t DataBuffer;
 	uint32_t* BootCounterAddress = NVM_START_ADDRESS + 0x4*1;
@@ -174,7 +174,13 @@ int main(void)
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
-//	uint8_t StatusFlashing = FlashApplication();
+//	uint8_t WantToFlash = 0;
+	uint8_t Status;
+	Status = CheckIfAppCorupted();
+	if (Status == 1)
+	{
+		uint8_t StatusFlashing = FlashApplication();
+	}
   while (1)
   {
 //	  SharedAPIs.ToggleLed.SourceCalling = FROM_BOOTLOADER;
@@ -188,7 +194,7 @@ int main(void)
 //		u32* ptr = 0x800EC08;
 //		u32* BootCounter = 0x800EC04;
 //		u32* BootCounterAddress = 0x800EC04;
-		uint8_t Status;
+
 		uint32_t DataToBeWritten = 0xAABBCCDD;
 		uint32_t DataBuffer;
 #ifdef GITHUB_FLASH
@@ -213,6 +219,8 @@ int main(void)
 		}
 #else
 
+
+#ifdef TESTING_NVM
 		Status = FlashUnlock();
 		Status = NVM_WriteAddress(AppCounter, &DataToBeWritten);
 		FlashLock();
@@ -245,22 +253,23 @@ int main(void)
 			}
 
 		}
+#endif
 
 #endif
 //		NVM_WriteBlock(0, (uint32_t*) JUST_FLASHED_4BYTES);
 //		ptrFunction = (uint32_t*) 0x8002A30;
 //		ptrFunction(0, (uint32_t*) JUST_FLASHED_4BYTES);
-	  uint8_t res = CheckIfAppCorupted();
-	  if (res == FALSE )
+//	  uint8_t res = CheckIfAppCorupted();
+//	  if (res == FALSE )
 	  {
 ////			__set_MSP(*(uint32_t *)FLASH_APP_ADDR);
 
 		  GoToApplication();
 	  }
-	  else
-	  {
-		  //do nothing
-	  }
+//	  else
+//	  {
+//		  //do nothing
+//	  }
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */

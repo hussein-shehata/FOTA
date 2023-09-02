@@ -170,5 +170,9 @@ void SendResponseToHost(uint8_t Response);
 uint8_t Flash_WriteAddress(uint32_t StartingAddress, uint32_t* DataBuffer);
 uint8_t OverWritePageFlash(uint32_t StartingAddress, uint32_t* DataBuffer);
 uint8_t Flash_ErasePage(uint32_t StartingAddress);
+uint8_t ProcessDataFrame(uint8_t* Buffer);
+uint8_t ProcessHeaderFrame(uint8_t* Buffer);
+uint8_t ProcessCommandFrame(uint8_t* Buffer);
+void Write0xFFToTheBuffer(uint8_t* Buffer);
 
 #endif /* INC_FLASHING_H_ */

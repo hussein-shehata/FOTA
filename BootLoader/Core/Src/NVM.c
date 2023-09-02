@@ -177,9 +177,9 @@ uint8_t NVM_ErasePage(uint32_t Starting_Address)
 	uint32_t DataBuffer = 0;
 	/* Wait till the flash memory operation in progress ends */
 	while(GET_BIT(FLASH_REGISTERS->Flash_SR , (uint32_t)0) == 1);
-	FLASH_REGISTERS->Flash_AR = Starting_Address;
 	CLR_BIT(FLASH_REGISTERS->Flash_CR, 0);
 	SET_BIT(FLASH_REGISTERS->Flash_CR, 1);
+	FLASH_REGISTERS->Flash_AR = Starting_Address;
 	SET_BIT(FLASH_REGISTERS->Flash_CR, 6);
 
 	/* Wait till the flash memory operation in progress ends */

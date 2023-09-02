@@ -25,8 +25,7 @@
 #include "BL_Functions.h"
 #include "SharedAPIs.h"
 //#include "Print.h"
-#include "NVM_Functions.h"
-#include "Flash.h"
+#include "Flashing.h"
 #include "NVM.h"
 /* USER CODE END Includes */
 
@@ -77,7 +76,7 @@ static void MX_USART1_UART_Init(void);
 int main(void)
 {
   /* USER CODE BEGIN 1 */
-#define NVM_TESTs
+//#define NVM_TEST
 //	BlockIDs NVM_Blocks;
 #ifdef NVM_TEST
 	uint32_t* u32_Data = 0;
@@ -129,10 +128,9 @@ int main(void)
 //  printf("this is the Boot Number = %ul",*BootCounter);
 
 
-//	uint8_t Status;
 	uint32_t DataToBeWritten = 0xAABBCCDD;
 	uint32_t DataBuffer;
-	uint32_t* BootCounterAddress = NVM_START_ADDRESS + 0x4*1;
+	uint32_t* BootCounterAddress = (uint32_t *) (NVM_START_ADDRESS + 0x4*1);
 	uint8_t EnterOnce = 1;
 	uint8_t Buffer[100] = {0} ;
 
@@ -174,7 +172,6 @@ int main(void)
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
-//	uint8_t WantToFlash = 0;
 	uint8_t Status;
 	Status = CheckIfAppCorupted();
 	if (Status == 1)
@@ -183,6 +180,8 @@ int main(void)
 	}
   while (1)
   {
+//#define SHARED_APIS_TEST
+#ifdef SHARED_APIS_TEST
 //	  SharedAPIs.ToggleLed.SourceCalling = FROM_BOOTLOADER;
 //	  SharedAPIs.ToggleLed.PtrFunction();
 	  HAL_Delay(100);
@@ -195,6 +194,7 @@ int main(void)
 //		u32* BootCounter = 0x800EC04;
 //		u32* BootCounterAddress = 0x800EC04;
 
+#endif
 		uint32_t DataToBeWritten = 0xAABBCCDD;
 		uint32_t DataBuffer;
 #ifdef GITHUB_FLASH
@@ -217,7 +217,7 @@ int main(void)
 		status = FLASH_WriteWord((u32*)BootCounterAddress,Counter);
 		printf("We Booted This Software %d Times\r\n", Counter);
 		}
-#else
+#endif
 
 
 #ifdef TESTING_NVM
@@ -255,21 +255,8 @@ int main(void)
 		}
 #endif
 
-#endif
-//		NVM_WriteBlock(0, (uint32_t*) JUST_FLASHED_4BYTES);
-//		ptrFunction = (uint32_t*) 0x8002A30;
-//		ptrFunction(0, (uint32_t*) JUST_FLASHED_4BYTES);
-//	  uint8_t res = CheckIfAppCorupted();
-//	  if (res == FALSE )
-	  {
-////			__set_MSP(*(uint32_t *)FLASH_APP_ADDR);
 
 		  GoToApplication();
-	  }
-//	  else
-//	  {
-//		  //do nothing
-//	  }
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */

@@ -103,37 +103,38 @@ void SendResponseToHost(uint8_t Response)
 
 }
 
-void ProcessCommandFrame(uint8_t* Buffer)
+uint8_t ProcessCommandFrame(uint8_t* Buffer)
 {
 	uint8_t Status;
 	ETX_OTA_COMMAND_* OtaStartFrame = (ETX_OTA_COMMAND_*) Buffer;
 		if(OtaStartFrame->sof != ETX_OTA_SOF)
 		{
 			Status = ETX_OTA_EX_ERR;  /* mgtlesh el start of frame byte */
-			return Status;
 		}
 		if( (OtaStartFrame->cmd == ETX_OTA_CMD_START) && (OtaStartFrame->packet_type == ETX_OTA_PACKET_TYPE_CMD ))
 		{
 			ExpectedFrame = ETX_OTA_PACKET_TYPE_HEADER;
 			/* Send ACK to the host as this is the OTA Start Frame */
 			SendResponseToHost(ETX_OTA_ACK);
+			Status = ETX_OTA_EX_OK;
 		}
 		else if ((OtaStartFrame->cmd == ETX_OTA_CMD_END) && (OtaStartFrame->packet_type == ETX_OTA_PACKET_TYPE_CMD ))
 		{
 			ExpectedFrame = ETX_OTA_PACKET_TYPE_FinishedComm;
 			/* Send ACK to the host as this is the OTA End Frame */
 			SendResponseToHost(ETX_OTA_ACK);
+			Status = ETX_OTA_EX_OK;
 		}
 		else
 		{
 			/* Send NACK to the host as this is the OTA Start Frame */
 			SendResponseToHost(ETX_OTA_NACK);
 			Status = ETX_OTA_EX_ERR;
-			return Status;
 		}
+		return Status;
 }
 
-void ProcessHeaderFrame(uint8_t* Buffer)
+uint8_t ProcessHeaderFrame(uint8_t* Buffer)
 {
 	uint8_t Status = ETX_OTA_EX_ERR;
 	ETX_OTA_HEADER_* OtaHeaderFrame = (ETX_OTA_HEADER_*) Buffer;
@@ -155,11 +156,11 @@ void ProcessHeaderFrame(uint8_t* Buffer)
 				/* Send NACK to the host as this is the OTA Start Frame */
 				SendResponseToHost(ETX_OTA_NACK);
 				Status = ETX_OTA_EX_ERR;
-				return Status;
 			}
+			return Status;
 }
 
-void ProcessDataFrame(uint8_t* Buffer)
+uint8_t ProcessDataFrame(uint8_t* Buffer)
 {
 	/* hna bi3ml write l el frame kolo msh el data bs */
 	/* Fixed el mafroud */
@@ -167,7 +168,19 @@ void ProcessDataFrame(uint8_t* Buffer)
 	ETX_OTA_DATA_* OtaDataFrame = (ETX_OTA_DATA_*) Buffer;
 	uint16_t DataLength = OtaDataFrame->data_len ;
 
-	uint8_t* PtrData = &OtaDataFrame->data;
+	/* Here I want the address of the variable data not the value it holds
+	 * The Address -> is the address of the first data byte received from the tool
+	 * the value -> the value of the fist byte received from the tool
+	 *
+	 * Example : if we received 0xAA from the tool as the first byte:
+	 * uint8_t* data = 0xAA;                // Which means that it will points to address 0xAA so it is wrong
+	 * to deference it   (data[0])
+	 *
+	 * so to get 0xAA i need to point to the address of data and deference it
+	 * PtrData = &data;                PtrData[0]
+	 */
+	uint8_t* PtrData = (uint8_t * )(&(OtaDataFrame->data));
+
 
 	static uint32_t NumberOfPagesWritten = 0;
 
@@ -196,17 +209,21 @@ void ProcessDataFrame(uint8_t* Buffer)
 
 //		Write0xFFToTheBuffer(Buffer);
 		/* Removing the SOF and CRC Bytes equal to 0xFF till finding a better solution */
-		Buffer[DataLength + 1] = 0xFF;
-		Buffer[DataLength + 2] = 0xFF;
-		Buffer[DataLength + 3] = 0xFF;
-		Buffer[DataLength + 4] = 0xFF;
-		Buffer[DataLength + 5] = 0xFF;
+		/* The Adding of 4 as the first 4 bytes are not data and they are SOF PacketType and Datalength*/
+		Buffer[DataLength + 1 + 4] = 0xFF;
+		Buffer[DataLength + 2 + 4] = 0xFF;
+		Buffer[DataLength + 3 + 4] = 0xFF;
+		Buffer[DataLength + 4 + 4] = 0xFF;
+		Buffer[DataLength + 5 + 4] = 0xFF;
 
 		OverWritePageFlash(ETX_APP_FLASH_ADDR + (NumberOfPagesWritten * 0x0400 ), (uint32_t *) PtrData);
 		FlashLock();
 		SendResponseToHost(ETX_OTA_ACK);
 		ExpectedFrame = ETX_OTA_PACKET_TYPE_FinishedComm;
+
 	}
+	Status = ETX_OTA_EX_OK;
+	return Status;
 }
 
 
@@ -221,7 +238,7 @@ uint8_t OverWritePageFlash(uint32_t StartingAddress, uint32_t* DataBuffer)
 		return Status;
 	}
 	FlashUnlock();
-//	Status = NVM_ErasePage(NVM_START_ADDRESS);
+	Status = Flash_ErasePage(StartingAddress);
 
 	for (uint16_t idx = 0; idx < ETX_OTA_DATA_MAX_SIZE / 4 ; idx++)
 	{
@@ -230,6 +247,8 @@ uint8_t OverWritePageFlash(uint32_t StartingAddress, uint32_t* DataBuffer)
 	}
 
 	FlashLock();
+	Status = ETX_OTA_EX_OK;
+	return Status;
 }
 
 uint8_t Flash_WriteAddress(uint32_t StartingAddress, uint32_t* DataBuffer)
@@ -283,14 +302,14 @@ uint8_t Flash_WriteAddress(uint32_t StartingAddress, uint32_t* DataBuffer)
 }
 
 
-uint8_t Flash_ErasePage(uint32_t StartingAddress)
+volatile uint8_t Flash_ErasePage(uint32_t StartingAddress)
 {
 	uint32_t Status = ETX_OTA_EX_ERR;
 	/* Wait till the flash memory operation in progress ends */
 	while(GET_BIT(FLASH_REGISTERS->Flash_SR , (uint32_t)0) == 1);
-	FLASH_REGISTERS->Flash_AR = StartingAddress;
 	CLR_BIT(FLASH_REGISTERS->Flash_CR, 0);
 	SET_BIT(FLASH_REGISTERS->Flash_CR, 1);
+	FLASH_REGISTERS->Flash_AR = StartingAddress;
 	SET_BIT(FLASH_REGISTERS->Flash_CR, 6);
 
 	/* Wait till the flash memory operation in progress ends */

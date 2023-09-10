@@ -4,3 +4,6 @@ e3ml wahda tania bt3ml nfs el haga bs tms7 region enta btdehalha
 8albn ht7tag t3ml wahda tania 3shan hia ma3mola 3la asas el NVM f e3ml wahda tania w e3ml debug 3leha ashl
 
 5ly balk enta 3aml enk bt-watch bit 1 fe el SR register wnta mafroud t-watch bit 0 bs el donia 3ndk sh8ala delwaty w shofha b3den
+
+
+- Fix the page erase to allow to overwrite the existing software

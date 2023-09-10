@@ -14,3 +14,9 @@ w t2dr t3ml save l hgat fe el flash memory bs fe section kda esmo configuration
 ht3ml save feh l eh sbb el reset w a5r mra enta 3mlt flash l version eh
 w momken t7ot el nvm_write w el read fe el shared APIs bs lazm tt2kd enhm sh8alen sa7 w t3od tdebug 3shan tzbotha
 w t3ml write l el app counter bardo 
+
+
+ana kda kol haga sh8ala sa7 m3ada 7tt el shared APIs
+deh ely htsht8l 3leha b3dha htkon 5lst kol haga fe el design dah
+
+ht3ml b2a 2 app slots w enta t3ml flash fe wahd w t5ly el slot1 hia ely ta5od mn slot2 el app

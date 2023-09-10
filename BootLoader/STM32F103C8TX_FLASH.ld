@@ -46,7 +46,7 @@ MEMORY
 {
   RAM    (xrw)    : ORIGIN = 0x20000000,   LENGTH = 20K
   FLASH    (rx)    : ORIGIN = 0x8000000,   LENGTH = 15K		/*Bootloader Flash Size */
-  SharedAPIs    (rx)    : ORIGIN = 0x8003C00,   LENGTH = 4K	/*SharedAPIs Flash Size */
+  SharedAPIs    (wrx)    : ORIGIN = 0x8003C00,   LENGTH = 4K	/*SharedAPIs Flash Size */
   APP_Flash (xrw)		: ORIGIN = 0x8005000,   LENGTH = 39K	/*Application Flash Size */
   NVM_Varaibles    (xrw)    : ORIGIN = 0x800EC00,   LENGTH = 1K	/*NVM Flash Size */
 }
@@ -84,7 +84,7 @@ SECTIONS
   {
   . = ALIGN(4);
   __API_SHARED_Section_start__ = .;
-  *(.API_SHARED_FuncSection*)
+  KEEP(*(.API_SHARED_FuncSection*))
   KEEP(*(.API_SHARED_Variables))
   __API_SHARED_Section_end__ = .;
 	} > SharedAPIs

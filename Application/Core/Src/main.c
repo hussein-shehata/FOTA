@@ -23,6 +23,7 @@
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 #include <stdio.h>
+#include "SharedAPIs_App.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -95,6 +96,7 @@ int main(void)
   printf("Starting Application (%d.%d)\n",APP_Version[0],APP_Version[1]);
   HAL_GPIO_WritePin(GPIOC, GPIO_PIN_13,GPIO_PIN_RESET);
   HAL_Delay(5000);
+  uint32_t PtrToHuart1 = &huart1;
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -104,7 +106,8 @@ int main(void)
     /* USER CODE END WHILE */
 //	  HAL_GPIO_WritePin(GPIOC, GPIO_PIN_13,GPIO_PIN_RESET);
 
-	  ToggleTestLed();
+	  SharedAPIs->ToggleLedPtr();
+	  SharedAPIs->FlashNewSoftwarePtr(huart1);
 	  HAL_Delay(5000);
     /* USER CODE BEGIN 3 */
   }

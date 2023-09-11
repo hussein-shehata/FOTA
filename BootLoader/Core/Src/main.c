@@ -176,17 +176,17 @@ int main(void)
 	Status = CheckIfAppCorupted();
 	if (Status == 1)
 	{
-		uint8_t StatusFlashing = FlashApplication();
+		uint8_t StatusFlashing = FlashApplication(huart1);
 	}
+
   while (1)
   {
-//#define SHARED_APIS_TEST
+#define SHARED_APIS_TEST
 #ifdef SHARED_APIS_TEST
-//	  SharedAPIs.ToggleLed.SourceCalling = FROM_BOOTLOADER;
-//	  SharedAPIs.ToggleLed.PtrFunction();
-	  HAL_Delay(100);
-//	  SharedAPIs.PrintHelloScreen.SourceCalling = FROM_BOOTLOADER;
-//	  SharedAPIs.PrintHelloScreen.PtrFunction();
+
+	  SharedAPIs.ToggleLedPtr();
+	  HAL_Delay(1000);
+	  SharedAPIs.ToggleLedPtr();
 
 //		Counter ++;
 //		u32 address = 0x800EC08;

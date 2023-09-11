@@ -9,6 +9,7 @@
 #include "Flashing.h"
 #include "NVM.h"
 #include "Bit_Math.h"
+#include "SharedAPIs.h"
 
 typedef struct
 {
@@ -29,7 +30,7 @@ typedef struct
 static ETX_OTA_PACKET_TYPE_  ExpectedFrame = ETX_OTA_PACKET_TYPE_CMD ;
 static uint32_t AppSize = 0;
 
-uint8_t FlashApplication(void)
+uint8_t  FlashApplication(UART_HandleTypeDef huart1)
 {
 	uint8_t Status = ETX_OTA_EX_ERR;
 	uint8_t ReceivedFrame = 0xFF;

@@ -5,13 +5,14 @@
  *      Author: Scorpio
  */
 
-#ifndef INC_SHAREDAPIS_H_
-#define INC_SHAREDAPIS_H_
+#ifndef INC_SHAREDAPIS_APP_H_
+#define INC_SHAREDAPIS_APP_H_
 
+#include "stm32f1xx_hal.h"
 
 #define 	SHARED_APIS_MEMORY_ADDRESS		0x8003C00
 
-extern struct APIs * SharedAPIs ;
+
 
 typedef enum{
 	FROM_BOOTLOADER,
@@ -19,19 +20,16 @@ typedef enum{
 	FROM_UNKNOWN_SOURCE
 }SourceCallingEnum;
 
-typedef struct
-{
-	SourceCallingEnum SourceCalling;
-	void (*PtrFunction) (void);
-}API;
 
 typedef struct
 {
-	API ToggleLed;
-	API PrintHelloScreen;
+	void (*ToggleLedPtr) (void) ;
+	uint8_t (*FlashNewSoftwarePtr) (UART_HandleTypeDef) ;
 }APIs;
 
 
 
+extern APIs* SharedAPIs ;
 
-#endif /* INC_SHAREDAPIS_H_ */
+
+#endif /* INC_SHAREDAPIS_APP_H_ */

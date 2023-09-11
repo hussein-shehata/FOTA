@@ -18,17 +18,12 @@ typedef enum{
 }SourceCallingEnum;
 
 
-typedef struct
-{
-	SourceCallingEnum SourceCalling;
-	void (*PtrFunction) (void);
-}API;
 
 /* Put Here the Shared APIs name and edit them in the .c File to initialize them */
 typedef struct
 {
-	API ToggleLed;
-	API PrintHelloScreen;
+	void (*ToggleLedPtr) (void) ;
+	uint8_t (*FlashNewSoftwarePtr) (UART_HandleTypeDef) ;
 }APIs;
 
 
@@ -39,7 +34,6 @@ typedef struct
 extern APIs SharedAPIs ;
 
 void InitSharedAPIs(void);
-void LOCATE_SHARED_API ToggleTestLed(void);
-void LOCATE_SHARED_API PrintHelloScreen(void);
+void  ToggleTestLed(void);
 
 #endif /* INC_SHAREDAPIS_H_ */

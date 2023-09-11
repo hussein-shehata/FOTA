@@ -163,7 +163,7 @@ typedef struct
 
 
 
-uint8_t FlashApplication(void);
+uint8_t FlashApplication(UART_HandleTypeDef huart1);
 uint8_t ReceiveChunk(uint8_t* Buffer,uint8_t Len);
 uint8_t ProcessChunck(uint8_t* Buffer);
 void SendResponseToHost(uint8_t Response);

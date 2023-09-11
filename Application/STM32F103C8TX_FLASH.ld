@@ -46,7 +46,7 @@ MEMORY
 {
   RAM    (xrw)    : ORIGIN = 0x20000000,   LENGTH = 20K
   FLASH    (rx)    : ORIGIN = 0x8005000,   LENGTH = 39K
-  SharedAPIs    (rx)    : ORIGIN = 0x8003C00,   LENGTH = 4K	/*SharedAPIs Flash Size */
+  SharedAPIs    (rwx)    : ORIGIN = 0x8003C00,   LENGTH = 4K	/*SharedAPIs Flash Size */
   NVM_Varaibles    (xrw)    : ORIGIN = 0x800EC00,   LENGTH = 1K	/*NVM Flash Size */
 }
 

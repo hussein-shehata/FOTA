@@ -10,7 +10,6 @@
 
 #include "stm32f1xx_hal.h"
 
-void GoToApplication(void);
 void GoToBootLoader(void);
 void ToggleTestLed(void);
 void PrintHelloScreen(void);

@@ -27,6 +27,7 @@
 //#include "Print.h"
 #include "Flashing.h"
 #include "NVM.h"
+#include "SharedData.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -121,52 +122,8 @@ int main(void)
   MX_USART1_UART_Init();
   /* USER CODE BEGIN 2 */
   printf("Starting BootLoader (%d.%d)\r\n",BL_Version[0],BL_Version[1]);
-//  HAL_GPIO_WritePin(GPIOA, GPIO_PIN_7,GPIO_PIN_SET);
-
-  /* TODO ****************e3ml watch 3la el variable dah w et2kd en hwa awl haga fe el nvm variables f3ln */
-//  uint32_t* BootCounter = ( (uint32_t*) __NVM_Section_start__ );
-//  printf("this is the Boot Number = %ul",*BootCounter);
 
 
-	uint32_t DataToBeWritten = 0xAABBCCDD;
-	uint32_t DataBuffer;
-	uint32_t* BootCounterAddress = (uint32_t *) (NVM_START_ADDRESS + 0x4*1);
-	uint8_t EnterOnce = 1;
-	uint8_t Buffer[100] = {0} ;
-
-
-	/***********************************VIP***********************/
-
-	/************Block el code ely t7t dah bigeb run time error m3rfsh leh
-	 * bs ama nzlto t7t hwa hwa 7rfin sh8al sa7
-	 */
-
-//	NVM_ReadAddress(BootCounter, &DataBuffer);
-//	if (DataBuffer == 0xFFFFFFFF)
-//	{
-//		/* This is the first time boot */
-//		DataToBeWritten = 0;
-//		Status = FlashUnlock();
-//		Status = NVM_WriteAddress(BootCounter, &DataToBeWritten);
-//		FlashLock();
-//	}
-//	else
-//	{
-//		DataToBeWritten = DataBuffer + 1;
-//		Status = FlashUnlock();
-//		Status = NVM_ErasePage(NVM_START_ADDRESS);
-//		Status = NVM_OverWriteAddress(BootCounter, &DataToBeWritten);
-//		Status = FlashUnlock();
-//	}
-
-	if ( *BootCounterAddress == 0xFFFFFFFF)
-	{
-		printf("this is the Boot Number = %u \r\n", 0);
-	}
-	else
-	{
-		printf("this is the Boot Number = %u \r\n",*BootCounterAddress);
-	}
 
   /* USER CODE END 2 */
 
@@ -174,9 +131,14 @@ int main(void)
   /* USER CODE BEGIN WHILE */
 	uint8_t Status;
 	Status = CheckIfAppCorupted();
+	uint8_t* PtrTest = &(SharedStruct.DownloadRequestedFromApplication);
 	if (Status == 1)
 	{
-		uint8_t StatusFlashing = FlashApplication(huart1);
+		uint8_t StatusFlashing = FlashApplication();
+	}
+	else if (SharedStruct.DownloadRequestedFromApplication == 1)
+	{
+		uint8_t StatusFlashing = FlashApplication();
 	}
 
   while (1)

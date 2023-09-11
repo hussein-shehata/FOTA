@@ -44,7 +44,8 @@ _Min_Stack_Size = 0x400; /* required amount of stack */
 /* Memories definition */
 MEMORY
 {
-  RAM    (xrw)    : ORIGIN = 0x20000000,   LENGTH = 20K
+  RAM    (xrw)    : ORIGIN = 0x20000000,   LENGTH = 19K
+  MYRAM  (xrw)	  : ORIGIN = 0x20004C00,   LENGTH = 1K
   FLASH    (rx)    : ORIGIN = 0x8000000,   LENGTH = 15K		/*Bootloader Flash Size */
   SharedAPIs    (wrx)    : ORIGIN = 0x8003C00,   LENGTH = 4K	/*SharedAPIs Flash Size */
   APP_Flash (xrw)		: ORIGIN = 0x8005000,   LENGTH = 39K	/*Application Flash Size */
@@ -198,6 +199,12 @@ SECTIONS
     . = ALIGN(8);
   } >RAM
 
+  .SharedDataSection :
+  {
+    . = ALIGN(4);
+    *(.SharedDataSection)
+  } >MYRAM
+    
   /* Remove information from the compiler libraries */
   /DISCARD/ :
   {

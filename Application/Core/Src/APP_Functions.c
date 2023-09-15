@@ -29,5 +29,6 @@ void GoToBootLoader(void)
 	 */
 	/* Notify Bootloader using this Flag that we want to download new software */
 	SharedStruct.DownloadRequestedFromApplication = 1;
+	HAL_RCC_DeInit();
 	ResetHandlerAPP();
 }

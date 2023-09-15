@@ -11,6 +11,7 @@
 #include "Bit_Math.h"
 #include "SharedAPIs.h"
 #include "SharedData.h"
+#include "Print.h"
 
 typedef struct
 {
@@ -38,11 +39,11 @@ uint8_t  FlashApplication()
 	uint8_t Buffer[ETX_OTA_PACKET_MAX_SIZE] = {0};
 
 
+
 	do
 	{
 	/* Waiting till receiving the  Frame */
 	Write0xFFToTheBuffer(Buffer);
-//	uint16_t NumberOfBytes = CalculateTheExpectedBytes();
 	if(ExpectedFrame == ETX_OTA_PACKET_TYPE_START)
 	{
 		SendResponseToHost(ETX_OTA_ACK);
@@ -93,25 +94,6 @@ uint8_t  FlashApplication()
 
 	return Status;
 }
-
-//uint8_t ReceiveChunk(uint8_t* Buffer,uint8_t Len)
-//{
-//	uint8_t Status = HAL_UART_Receive(&huart1, Buffer, Len, 5000);
-//
-//	Return Status;
-//}
-
-
-//uint8_t ProcessChunck(uint8_t* Buffer)
-//{
-//	ETX_OTA_PACKET_TYPE_ PacketType = Buffer[1]; /* Second Byte */
-//	switch (PacketType)
-//	{
-//	case ETX_OTA_PACKET_TYPE_CMD :
-//		ETX_OTA_COMMAND_* CurrentFrame = (ETX_OTA_COMMAND_*) Buffer;
-//		CurrentFrame->
-//	}
-//}
 
 void SendResponseToHost(uint8_t Response)
 {
@@ -188,6 +170,7 @@ uint8_t ProcessDataFrame(uint8_t* Buffer)
 	uint8_t Status = ETX_OTA_EX_ERR;
 	ETX_OTA_DATA_* OtaDataFrame = (ETX_OTA_DATA_*) Buffer;
 	uint16_t DataLength = OtaDataFrame->data_len ;
+	static uint32_t BytesWritten = 0;
 
 	/* Here I want the address of the variable data not the value it holds
 	 * The Address -> is the address of the first data byte received from the tool
@@ -207,13 +190,13 @@ uint8_t ProcessDataFrame(uint8_t* Buffer)
 
 	if (DataLength == ETX_OTA_DATA_MAX_SIZE)
 	{
+//		ExpectedFrame = ETX_OTA_PACKET_TYPE_DATA;
 		/* Write Full page in flash memorry */
-		ExpectedFrame = ETX_OTA_PACKET_TYPE_DATA;
 		FlashUnlock();
 		OverWritePageFlash(ETX_APP_FLASH_ADDR + (NumberOfPagesWritten * 0x0400 ), (uint32_t *) PtrData);
 		FlashLock();
 		NumberOfPagesWritten++;
-		SendResponseToHost(ETX_OTA_ACK);
+//		SendResponseToHost(ETX_OTA_ACK);
 	}
 	else
 	{
@@ -239,9 +222,28 @@ uint8_t ProcessDataFrame(uint8_t* Buffer)
 
 		OverWritePageFlash(ETX_APP_FLASH_ADDR + (NumberOfPagesWritten * 0x0400 ), (uint32_t *) PtrData);
 		FlashLock();
-		SendResponseToHost(ETX_OTA_ACK);
-		ExpectedFrame = ETX_OTA_PACKET_TYPE_END;
+//		SendResponseToHost(ETX_OTA_ACK);
+//		ExpectedFrame = ETX_OTA_PACKET_TYPE_END;
+	}
 
+	/* Check if there is Any Remaining Bytes to receive or not */
+	/* This condition cover Corner case when the Binary File size is divisible by 1024 */
+	/* So the last Data Frame will be equal to ETX_OTA_DATA_MAX_SIZE  and wont enter the above Else*/
+	BytesWritten = BytesWritten + DataLength ;
+	if (BytesWritten < AppSize)
+	{
+		ExpectedFrame = ETX_OTA_PACKET_TYPE_DATA;
+		SendResponseToHost(ETX_OTA_ACK);
+	}
+	else if (BytesWritten == AppSize)
+	{
+		ExpectedFrame = ETX_OTA_PACKET_TYPE_END;
+		SendResponseToHost(ETX_OTA_ACK);
+		BytesWritten = 0;
+	}
+	else
+	{
+		Status = ETX_OTA_EX_ERR;
 	}
 	Status = ETX_OTA_EX_OK;
 	return Status;
@@ -365,17 +367,3 @@ void Write0xFFToTheBuffer(uint8_t* Buffer)
 	}
 }
 
-/* to Calculate the expected receiving bytes from UART */
-//uint16_t CalculateTheExpectedBytes(void)
-//{
-//	uint16_t ExpectedBytes;
-//	switch(ExpectedFrame)
-//	{
-//	case ETX_OTA_PACKET_TYPE_CMD:
-//		ExpectedBytes = 10;
-//		break
-//
-//	case ETX_OTA_PACKET_TYPE_DATA
-//	}
-//
-//}

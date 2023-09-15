@@ -24,6 +24,8 @@ void GoToApplication(void)
 	/*we dont need to initialize stack pointer as the boot loader and the application have the
 	 * same stack hence, the same stack pointer and it is already initialized by HW in ARM
 	 */
+//	HAL_UART_DeInit(&huart1);
+	HAL_RCC_DeInit();
 	ResetHandlerAPP();
 }
 

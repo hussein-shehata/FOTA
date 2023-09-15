@@ -24,7 +24,7 @@ typedef enum{
 typedef struct
 {
 	void (*ToggleLedPtr) (void) ;
-	uint8_t (*FlashNewSoftwarePtr) (UART_HandleTypeDef) ;
+	uint8_t (*FlashNewSoftwarePtr) (void) ;
 }APIs;
 
 

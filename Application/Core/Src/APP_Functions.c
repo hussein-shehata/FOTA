@@ -13,11 +13,11 @@
 
 
 
-void ToggleTestLed(void)
-{
-	/*Toggling the Test Led in the Bluepill board*/
-	HAL_GPIO_TogglePin(GPIOC, GPIO_PIN_13);
-}
+//void ToggleTestLed(void)
+//{
+//	/*Toggling the Test Led in the Bluepill board*/
+//	HAL_GPIO_TogglePin(GPIOC, GPIO_PIN_13);
+//}
 
 void GoToBootLoader(void)
 {

@@ -11,6 +11,7 @@
 #include "stm32f1xx_hal.h"
 
 typedef struct {
+//	UART_HandleTypeDef huart1;
     uint8_t DownloadRequestedFromApplication;
     // Add more shared variables as needed
 } SharedData;

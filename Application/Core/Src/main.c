@@ -25,6 +25,7 @@
 #include <stdio.h>
 #include "SharedAPIs_App.h"
 #include "SharedData.h"
+#include "Print.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -95,10 +96,12 @@ int main(void)
   MX_USART1_UART_Init();
   /* USER CODE BEGIN 2 */
   printf("Starting Application (%d.%d)\n",APP_Version[0],APP_Version[1]);
+
   HAL_GPIO_WritePin(GPIOC, GPIO_PIN_13,GPIO_PIN_RESET);
   HAL_Delay(1000);
 	uint8_t* PtrTest = &(SharedStruct.DownloadRequestedFromApplication);
-  GoToBootLoader();
+//	uint32_t*  = &SharedStruct.huart1;
+//  GoToBootLoader();
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -109,7 +112,7 @@ int main(void)
 //	  HAL_GPIO_WritePin(GPIOC, GPIO_PIN_13,GPIO_PIN_RESET);
 
 	  SharedAPIs->ToggleLedPtr();
-	  SharedAPIs->FlashNewSoftwarePtr(huart1);
+	  SharedAPIs->FlashNewSoftwarePtr();
 	  HAL_Delay(5000);
     /* USER CODE BEGIN 3 */
   }
@@ -215,20 +218,7 @@ static void MX_GPIO_Init(void)
 }
 
 /* USER CODE BEGIN 4 */
-#ifdef __GNUC__
-  /* With GCC, small printf (option LD Linker->Libraries->Small printf
-     set to 'Yes') calls __io_putchar() */
-int __io_putchar(int ch)
-#else
-int fputc(int ch, FILE *f)
-#endif /* __GNUC__ */
-{
-  /* Place your implementation of fputc here */
-  /* e.g. write a character to the UART3 and Loop until the end of transmission */
-  HAL_UART_Transmit(&huart1, (uint8_t *)&ch, 1, HAL_MAX_DELAY);
 
-  return ch;
-}
 /* USER CODE END 4 */
 
 /**

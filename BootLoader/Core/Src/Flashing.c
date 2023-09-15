@@ -10,6 +10,7 @@
 #include "NVM.h"
 #include "Bit_Math.h"
 #include "SharedAPIs.h"
+#include "SharedData.h"
 
 typedef struct
 {
@@ -36,11 +37,18 @@ uint8_t  FlashApplication()
 	uint8_t ReceivedFrame = 0xFF;
 	uint8_t Buffer[ETX_OTA_PACKET_MAX_SIZE] = {0};
 
+
 	do
 	{
 	/* Waiting till receiving the  Frame */
 	Write0xFFToTheBuffer(Buffer);
-	HAL_UART_Receive(&huart1, Buffer, ETX_OTA_PACKET_MAX_SIZE, 10000);
+//	uint16_t NumberOfBytes = CalculateTheExpectedBytes();
+	if(ExpectedFrame == ETX_OTA_PACKET_TYPE_CMD)
+	{
+		SendResponseToHost(ETX_OTA_ACK);
+	}
+	/* There is a problem in this timeout parameter when jumping from Application to BL */
+	HAL_UART_Receive(&huart1, Buffer, 2, 1000);
 	ReceivedFrame = Buffer[1];
 	if(ReceivedFrame != ExpectedFrame)
 	{
@@ -52,14 +60,20 @@ uint8_t  FlashApplication()
 	{
 	case ETX_OTA_PACKET_TYPE_CMD:
 		/* Received either Start or End Frame */
+		HAL_UART_Receive(&huart1, &(Buffer[2]), 8, 1000);
 		ProcessCommandFrame(Buffer);
 		break;
 
 	case ETX_OTA_PACKET_TYPE_HEADER :
 		/* Received Frame is Header Frame */
+		HAL_UART_Receive(&huart1, &(Buffer[2]), 23, 1000);
 		ProcessHeaderFrame(Buffer);
 		break;
 	case ETX_OTA_PACKET_TYPE_DATA:
+		HAL_UART_Receive(&huart1, &(Buffer[2]), 2, 1000);
+		uint16_t DataLength = Buffer[3];
+		DataLength = (DataLength<<8) | Buffer[2];
+		HAL_UART_Receive(&huart1, &(Buffer[4]), DataLength + 5, 100000);
 		ProcessDataFrame(Buffer);
 		break;
 
@@ -68,7 +82,7 @@ uint8_t  FlashApplication()
 
 
 	}while(ExpectedFrame != ETX_OTA_PACKET_TYPE_FinishedComm);
-
+	ExpectedFrame = ETX_OTA_PACKET_TYPE_CMD; /* for the next time to download new Application in the same reset */
 	SendResponseToHost(ETX_OTA_ACK);
 	Status = ETX_OTA_EX_OK;
 	return Status;
@@ -344,3 +358,18 @@ void Write0xFFToTheBuffer(uint8_t* Buffer)
 		Buffer[idx] = 0xFF;
 	}
 }
+
+/* to Calculate the expected receiving bytes from UART */
+//uint16_t CalculateTheExpectedBytes(void)
+//{
+//	uint16_t ExpectedBytes;
+//	switch(ExpectedFrame)
+//	{
+//	case ETX_OTA_PACKET_TYPE_CMD:
+//		ExpectedBytes = 10;
+//		break
+//
+//	case ETX_OTA_PACKET_TYPE_DATA
+//	}
+//
+//}

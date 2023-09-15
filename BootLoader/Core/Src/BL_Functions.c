@@ -18,7 +18,7 @@ void GoToApplication(void)
 {
 	printf("Gonna go to Application");
 	HAL_GPIO_WritePin(GPIOC, GPIO_PIN_13,GPIO_PIN_SET);
-	HAL_Delay(5000);
+//	HAL_Delay(5000);
 	/* points to the start of startup of the Application code */
 	void (*ResetHandlerAPP)(void) = (void*)(* (volatile uint32_t *) (APPLICATION_START_MEMORY_ADDRESS + BUS_SIZE_IN_BYTES));
 	/*we dont need to initialize stack pointer as the boot loader and the application have the

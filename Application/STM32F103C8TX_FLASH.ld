@@ -198,7 +198,9 @@ SECTIONS
     . = ALIGN(8);
   } >RAM
   
-    .SharedDataSection :
+    .SharedDataSection (NOLOAD):  /* Using NOLOAD attribute to make the binary file small in size*/
+    							/* how it is done I dont understand it too well but it has something to do*/
+    							/* with the memory being continous */
   {
     . = ALIGN(4);
     *(.SharedDataSection)

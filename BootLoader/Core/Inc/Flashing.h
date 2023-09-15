@@ -57,10 +57,11 @@ typedef enum
  */
 typedef enum
 {
-  ETX_OTA_PACKET_TYPE_CMD       = 0,    // Command
+  ETX_OTA_PACKET_TYPE_START     = 0,    // Start
   ETX_OTA_PACKET_TYPE_DATA      = 1,    // Data
   ETX_OTA_PACKET_TYPE_HEADER    = 2,    // Header
   ETX_OTA_PACKET_TYPE_RESPONSE  = 3,    // Response
+  ETX_OTA_PACKET_TYPE_END       = 4,    // End
   ETX_OTA_PACKET_TYPE_FinishedComm = 0xAA
 }ETX_OTA_PACKET_TYPE_;
 

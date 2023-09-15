@@ -78,14 +78,15 @@ int main(void)
   /* MCU Configuration--------------------------------------------------------*/
 
   /* Reset of all peripherals, Initializes the Flash interface and the Systick. */
-  HAL_Init();
+//  HAL_Init();
+//  SystemInit();
 
   /* USER CODE BEGIN Init */
 
   /* USER CODE END Init */
 
   /* Configure the system clock */
-  SystemClock_Config();
+//  SystemClock_Config();
 
   /* USER CODE BEGIN SysInit */
 
@@ -101,7 +102,7 @@ int main(void)
   HAL_Delay(1000);
 	uint8_t* PtrTest = &(SharedStruct.DownloadRequestedFromApplication);
 //	uint32_t*  = &SharedStruct.huart1;
-//  GoToBootLoader();
+  GoToBootLoader();
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -112,7 +113,7 @@ int main(void)
 //	  HAL_GPIO_WritePin(GPIOC, GPIO_PIN_13,GPIO_PIN_RESET);
 
 	  SharedAPIs->ToggleLedPtr();
-	  SharedAPIs->FlashNewSoftwarePtr();
+//	  SharedAPIs->FlashNewSoftwarePtr();
 	  HAL_Delay(5000);
     /* USER CODE BEGIN 3 */
   }

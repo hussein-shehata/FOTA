@@ -28,7 +28,7 @@ typedef struct
 #define FLASH_REGISTERS   		((Flash_Registers *) FLASH_REGISTER_BASE_ADDRESS )
 
 
-static ETX_OTA_PACKET_TYPE_  ExpectedFrame = ETX_OTA_PACKET_TYPE_CMD ;
+static ETX_OTA_PACKET_TYPE_  ExpectedFrame = ETX_OTA_PACKET_TYPE_START ;
 static uint32_t AppSize = 0;
 
 uint8_t  FlashApplication()
@@ -43,7 +43,7 @@ uint8_t  FlashApplication()
 	/* Waiting till receiving the  Frame */
 	Write0xFFToTheBuffer(Buffer);
 //	uint16_t NumberOfBytes = CalculateTheExpectedBytes();
-	if(ExpectedFrame == ETX_OTA_PACKET_TYPE_CMD)
+	if(ExpectedFrame == ETX_OTA_PACKET_TYPE_START)
 	{
 		SendResponseToHost(ETX_OTA_ACK);
 	}
@@ -58,7 +58,7 @@ uint8_t  FlashApplication()
 	}
 	switch (ReceivedFrame)
 	{
-	case ETX_OTA_PACKET_TYPE_CMD:
+	case ETX_OTA_PACKET_TYPE_START:
 		/* Received either Start or End Frame */
 		HAL_UART_Receive(&huart1, &(Buffer[2]), 8, 1000);
 		ProcessCommandFrame(Buffer);
@@ -73,18 +73,24 @@ uint8_t  FlashApplication()
 		HAL_UART_Receive(&huart1, &(Buffer[2]), 2, 1000);
 		uint16_t DataLength = Buffer[3];
 		DataLength = (DataLength<<8) | Buffer[2];
-		HAL_UART_Receive(&huart1, &(Buffer[4]), DataLength + 5, 100000);
+		HAL_UART_Receive(&huart1, &(Buffer[4]), DataLength + 5, 1000);
 		ProcessDataFrame(Buffer);
 		break;
 
+	case ETX_OTA_PACKET_TYPE_END:
+		HAL_UART_Receive(&huart1, &(Buffer[2]), 15, 1000);
+		ExpectedFrame = ETX_OTA_PACKET_TYPE_FinishedComm;
+		SendResponseToHost(ETX_OTA_ACK);
+		break;
 	}
 
 
-
 	}while(ExpectedFrame != ETX_OTA_PACKET_TYPE_FinishedComm);
-	ExpectedFrame = ETX_OTA_PACKET_TYPE_CMD; /* for the next time to download new Application in the same reset */
-	SendResponseToHost(ETX_OTA_ACK);
+	ExpectedFrame = ETX_OTA_PACKET_TYPE_START; /* for the next time to download new Application in the same reset */
+
 	Status = ETX_OTA_EX_OK;
+	/* for testing only */
+
 	return Status;
 }
 
@@ -126,14 +132,14 @@ uint8_t ProcessCommandFrame(uint8_t* Buffer)
 		{
 			Status = ETX_OTA_EX_ERR;  /* mgtlesh el start of frame byte */
 		}
-		if( (OtaStartFrame->cmd == ETX_OTA_CMD_START) && (OtaStartFrame->packet_type == ETX_OTA_PACKET_TYPE_CMD ))
+		if( (OtaStartFrame->cmd == ETX_OTA_CMD_START) && (OtaStartFrame->packet_type == ETX_OTA_PACKET_TYPE_START ))
 		{
 			ExpectedFrame = ETX_OTA_PACKET_TYPE_HEADER;
 			/* Send ACK to the host as this is the OTA Start Frame */
 			SendResponseToHost(ETX_OTA_ACK);
 			Status = ETX_OTA_EX_OK;
 		}
-		else if ((OtaStartFrame->cmd == ETX_OTA_CMD_END) && (OtaStartFrame->packet_type == ETX_OTA_PACKET_TYPE_CMD ))
+		else if ((OtaStartFrame->cmd == ETX_OTA_CMD_END) && (OtaStartFrame->packet_type == ETX_OTA_PACKET_TYPE_START ))
 		{
 			ExpectedFrame = ETX_OTA_PACKET_TYPE_FinishedComm;
 			/* Send ACK to the host as this is the OTA End Frame */
@@ -234,7 +240,7 @@ uint8_t ProcessDataFrame(uint8_t* Buffer)
 		OverWritePageFlash(ETX_APP_FLASH_ADDR + (NumberOfPagesWritten * 0x0400 ), (uint32_t *) PtrData);
 		FlashLock();
 		SendResponseToHost(ETX_OTA_ACK);
-		ExpectedFrame = ETX_OTA_PACKET_TYPE_FinishedComm;
+		ExpectedFrame = ETX_OTA_PACKET_TYPE_END;
 
 	}
 	Status = ETX_OTA_EX_OK;

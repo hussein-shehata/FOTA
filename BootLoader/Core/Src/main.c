@@ -103,7 +103,8 @@ int main(void)
   /* USER CODE END 1 */
 
   /* MCU Configuration--------------------------------------------------------*/
-
+	if(SharedStruct.DownloadRequestedFromApplication != 1)
+	{
   /* Reset of all peripherals, Initializes the Flash interface and the Systick. */
   HAL_Init();
 
@@ -113,16 +114,20 @@ int main(void)
 
   /* Configure the system clock */
   SystemClock_Config();
+	}
+
+
 
   /* USER CODE BEGIN SysInit */
 //	HAL_GPIO_TogglePin(GPIOC, GPIO_PIN_13);
+	HAL_Delay(2000);
   /* USER CODE END SysInit */
 
   /* Initialize all configured peripherals */
   MX_GPIO_Init();
   MX_USART1_UART_Init();
   /* USER CODE BEGIN 2 */
-  printf("Starting BootLoader (%d.%d)\r\n",BL_Version[0],BL_Version[1]);
+//  printf("Starting BootLoader (%d.%d)\r\n",BL_Version[0],BL_Version[1]);
 
 
 

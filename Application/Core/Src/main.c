@@ -96,7 +96,7 @@ int main(void)
   MX_GPIO_Init();
   MX_USART1_UART_Init();
   /* USER CODE BEGIN 2 */
-//  printf("Starting Application (%d.%d)\n",APP_Version[0],APP_Version[1]);
+  printf("Starting Application (%d.%d)\n",APP_Version[0],APP_Version[1]);
 
   HAL_GPIO_WritePin(GPIOC, GPIO_PIN_13,GPIO_PIN_RESET);
   HAL_Delay(1000);

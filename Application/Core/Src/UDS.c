@@ -6,6 +6,7 @@
  */
 #include "UDS.h"
 #include "Bit_Math.h"
+#include "aes.h"
 
 
 #define RXNE_BIT			5
@@ -16,6 +17,7 @@ extern UART_HandleTypeDef huart1;
 static uint8_t CurrentSession = DefaultSession;
 static volatile uint32_t* USART_SR = (uint32_t*)0x40013800;
 
+static uint32_t ComparingKey[4] ; /* Variable to hold the value of the Key to approve the security access */
 
 /* Runnable to check if the tool want to send Command */
 /* It is done by watching the RXNE Bit in the Status Register to check
@@ -111,4 +113,36 @@ void UDS_ChangeSession(uint8_t RequestedSession)
 	{
 		// Do Nothing
 	}
+}
+
+
+void UDS_SendSeed()
+{
+	/* The Seed which is gonna be send to the Flashing Tool */
+	/* I will use 4 Bytes seed and key */
+	    uint8_t Seed[4] = {0};
+	    /* Generate Number in between 0 -> 255 */
+	    Seed[0] = GenerateSeed(0,255);
+	    Seed[1] = GenerateSeed(0,255);
+	    Seed[2] = GenerateSeed(0,255);
+	    Seed[3] = GenerateSeed(0,255);
+
+	    for (uint8_t idx = 0; idx < 4; idx++)
+	    {
+	    	ComparingKey[idx] = Seed[idx];
+	    }
+	    /* The Key used to encrypt and decrypt the data */
+	    /* It is a private key which is only known to the 2 parties " the Tool and the ECU" */
+	    uint8_t Encrypting_Key[] = { 0x2b, 0x7e, 0x15, 0x16};
+
+	    struct AES_ctx ctx;
+
+	    AES_init_ctx(&ctx, Encrypting_Key);
+	    AES_ECB_encrypt(&ctx, Seed);
+	//    printf("Seed After Encrypting is : %x %x %x %x\r\n",Seed[0],Seed[1], Seed[2], Seed[3]);
+
+	    /* Sending the Seed by Uart to the tool */
+//	    HAL_UART_Transmit(&huart1, Seed, 4, 1000);
+//	    mafroud lsa hn3mlo send bl send positve response
+
 }

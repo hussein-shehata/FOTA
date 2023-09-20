@@ -26,6 +26,7 @@
 #include "SharedAPIs_App.h"
 #include "SharedData.h"
 #include "Print.h"
+#include "aes.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -100,7 +101,7 @@ int main(void)
 
   HAL_GPIO_WritePin(GPIOC, GPIO_PIN_13,GPIO_PIN_RESET);
   HAL_Delay(1000);
-
+  MainEncrupt();
   GoToBootLoader();
   /* USER CODE END 2 */
 

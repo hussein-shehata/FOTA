@@ -78,10 +78,18 @@ typedef enum
 	RequestExitNegativeResponse,
 }McuResponse;
 
+typedef enum
+{
+	NoNRC = 0xFF,   /* Used to be sent as parameter in send response function when it is +ve response */
+	ServiceNotSupported = 0x11,
+	IncorrectMessageLengthOrInvalidFormat = 0x13,
+	InvalidKey = 0x33
+}NrcResponse;
+
 void UDS_MainFunction(void);
 void UDS_ReceiveCommand(void);
 void UDS_SendHandShake(void);
-void UDS_SendReponse(ToolCommands RequestedCommand, McuResponse Reponse);
+void UDS_SendReponse(McuResponse Reponse, NrcResponse NRC);
 void UDS_ChangeSession(uint8_t RequestedSession);
 void UDS_SendSeed(void);
 void UDS_CompareKeys(uint8_t* Buffer);

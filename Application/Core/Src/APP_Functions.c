@@ -28,7 +28,7 @@ void GoToBootLoader(void)
 	 * same stack hence, the same stack pointer and it is already initialized by HW in ARM
 	 */
 	/* Notify Bootloader using this Flag that we want to download new software */
-	SharedStruct.DownloadRequestedFromApplication = 1;
+	SharedStruct.GoToBootloaderRequested = 1;
 	HAL_RCC_DeInit();
 	ResetHandlerAPP();
 }

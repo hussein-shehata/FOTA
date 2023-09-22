@@ -13,6 +13,7 @@
 typedef struct {
 //	UART_HandleTypeDef huart1;
     uint8_t DownloadRequestedFromApplication;
+    uint8_t GoToBootloaderRequested;
     // Add more shared variables as needed
 } SharedData;
 

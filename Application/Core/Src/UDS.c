@@ -12,6 +12,7 @@
 #include "UDS.h"
 #include "Bit_Math.h"
 #include "aes.h"
+#include "APP_Functions.h"
 
 #define DUMMY_VARIABLE(x)		(void)x
 
@@ -25,6 +26,29 @@ static uint8_t ReceivingBuffer[8] = {0};
 static uint8_t CurrentSession = DefaultSession;
 static volatile uint32_t* USART_SR = (uint32_t*)0x40013800;
 
+/* Private Bit-Field Structure Flags to indicate what process is available
+ * depending on the Requests Made by the user before
+ */
+/* I made it Bit Field to optimize Memory as we are gonna use only 1 bit for each flag */
+typedef struct
+{
+
+	ValuesForUDSFlag RequestDownload : 1;
+	ValuesForUDSFlag RequestSeed :1;
+	ValuesForUDSFlag ComparingKey : 1;
+	ValuesForUDSFlag EraseMemory : 1;
+
+}UDS_Flags;
+
+static UDS_Flags RequestsFlags =
+{
+
+	.RequestDownload = Failed,
+	.RequestSeed     = Failed,
+	.ComparingKey    = Failed,
+	.EraseMemory     = Failed
+};
+
 static uint32_t ComparingKey[SEED_LENGTH] ; /* Variable to hold the value of the Key to approve the security access */
 
 /* Runnable to check if the tool want to send Command */
@@ -35,7 +59,20 @@ void UDS_MainFunction(void)
 {
 	uint8_t IsDummyByteReceived = GET_BIT(*USART_SR,RXNE_BIT);
 	uint8_t Buffer[1] = {0};
-
+	/* Testing Only */
+	HAL_Delay(1000); /* btgeb error zy el mra ely fatt */
+	uint8_t* SessionPtr = &CurrentSession;
+	if(CurrentSession == DefaultSession)
+	{
+		CurrentSession = BootloaderSession;
+		GoToBootLoader();
+	}
+	else if(CurrentSession == BootloaderSession)
+	{
+		/* We received the correct data */
+		CurrentSession = ExtendedSession;
+	}
+/* end of testing block */
 	if(IsDummyByteReceived == 1)
 	{
 		/* Make Sure that the received Byte is the Dummy One */
@@ -164,8 +201,9 @@ void UDS_SendSeed()
 	//    printf("Seed After Encrypting is : %x %x %x %x\r\n",Seed[0],Seed[1], Seed[2], Seed[3]);
 
 	    /* Sending the Seed by Uart to the tool */
-//	    HAL_UART_Transmit(&huart1, Seed, 4, 1000);
-//	    mafroud lsa hn3mlo send bl send positve response
+	    HAL_UART_Transmit(&huart1, Seed, 4, 1000);
+	    UDS_SendReponse(SendKeyPostiveResponse, NoNRC);
+	    RequestsFlags.RequestSeed = Success;
 
 }
 
@@ -178,11 +216,13 @@ void UDS_CompareKeys(uint8_t* ReceivedKey)
 		{
 			/* Send -ve Response as the Key received from the tool is incorrect*/
 			UDS_SendReponse(SendKeyNegativeResponse, InvalidKey);
+			RequestsFlags.ComparingKey = Failed;
 			return;
 		}
 	}
 	/* if we come here then the Received Key matches our Key */
 	UDS_SendReponse(SendKeyPostiveResponse, NoNRC);
+	RequestsFlags.ComparingKey = Success;
 
 }
 

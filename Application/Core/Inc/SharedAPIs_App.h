@@ -25,11 +25,14 @@ typedef struct
 {
 	void (*ToggleLedPtr) (void) ;
 	uint8_t (*FlashNewSoftwarePtr) (void) ;
+	void (*UDS_MainFunction) (void) ;
 }APIs;
 
 
 
-extern APIs* SharedAPIs ;
+extern APIs SharedAPIs ;
 
+
+void  ToggleTestLed(void);
 
 #endif /* INC_SHAREDAPIS_APP_H_ */

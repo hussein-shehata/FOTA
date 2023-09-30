@@ -24,6 +24,7 @@ typedef struct
 {
 	void (*ToggleLedPtr) (void) ;
 	uint8_t (*FlashNewSoftwarePtr) (UART_HandleTypeDef) ;
+	void (*UDS_MainFunction) (void) ;
 }APIs;
 
 
@@ -31,7 +32,7 @@ typedef struct
 
 #define LOCATE_SHARED_API		__attribute__((section(".API_SHARED_FuncSection")))
 
-extern APIs SharedAPIs ;
+extern APIs* SharedAPIs ;
 
 void InitSharedAPIs(void);
 void  ToggleTestLed(void);

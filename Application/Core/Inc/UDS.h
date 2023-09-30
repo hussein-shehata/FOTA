@@ -9,6 +9,11 @@
 #define INC_UDS_H_
 
 #include "stm32f1xx_hal.h"
+typedef enum
+{
+	Failed =0,
+	Success
+}ValuesForUDSFlag;
 
 typedef enum
 {

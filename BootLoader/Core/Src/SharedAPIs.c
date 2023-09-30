@@ -9,21 +9,17 @@
 #include "Print.h"
 #include "Flashing.h"
 
+#define 	SHARED_APIS_MEMORY_ADDRESS		0x8003C00
 
-/* Initialize  the Members of the structure here not in a function to optimize memory */
 
-APIs SharedAPIs __attribute__((section(".API_SHARED_Variables"))) ={
-		.ToggleLedPtr = &ToggleTestLed,
-		.FlashNewSoftwarePtr = &FlashApplication
-
-};
+APIs* SharedAPIs  = (APIs* ) SHARED_APIS_MEMORY_ADDRESS;
 
 
 
-void  ToggleTestLed(void)
-{
-	/*Toggling the Test Led in the Bluepill board*/
-	HAL_GPIO_TogglePin(GPIOC, GPIO_PIN_13);
-}
+//void  ToggleTestLed(void)
+//{
+//	/*Toggling the Test Led in the Bluepill board*/
+//	HAL_GPIO_TogglePin(GPIOC, GPIO_PIN_13);
+//}
 
 

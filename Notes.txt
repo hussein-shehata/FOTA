@@ -20,3 +20,9 @@ ana kda kol haga sh8ala sa7 m3ada 7tt el shared APIs
 deh ely htsht8l 3leha b3dha htkon 5lst kol haga fe el design dah
 
 ht3ml b2a 2 app slots w enta t3ml flash fe wahd w t5ly el slot1 hia ely ta5od mn slot2 el app
+
+
+lazm a3ml systeminit() gwa el uds main function 
+w h3ml flag h3mlo set lma ad5l el bootloader w a5leh y5ly el current session tb2a bootloader
+
+w momken a3ml function uds init yb2a gwaha el system init function w hwar el current session deh

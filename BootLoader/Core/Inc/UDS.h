@@ -106,6 +106,9 @@ void UDS_SendReponse(McuResponse Reponse, NrcResponse NRC);
 void UDS_ChangeSession(uint8_t RequestedSession);
 void UDS_SendSeed(void);
 void UDS_CompareKeys(uint8_t* Buffer);
+void UDS_RequestDownload();
+void ChangeDataEncryptingKey(EncryptionTechniques Technique);
+void UDS_TransferData();
 
 
 #endif /* INC_UDS_H_ */

@@ -125,7 +125,7 @@ void UDS_ReceiveCommand(void)
 			/* Make Sure that the Tool Has Requested Seed Before */
 			if (RequestsFlags.RequestSeed == Success)
 			{
-				RequestsFlags.RequestSeed == Failed;
+				RequestsFlags.RequestSeed = Failed;
 				UDS_CompareKeys(&(ReceivingBuffer[2]));
 			}
 		}
@@ -141,6 +141,15 @@ void UDS_ReceiveCommand(void)
 		if(RequestsFlags.ComparingKey == Success)
 		{
 			UDS_RequestDownload();
+		}
+	}
+	else if(ReceivingBuffer[0] == TransferData)
+	{
+		/* The Received Command is to TransferData */
+		/* Make Sure that Request Download Has been Approved */
+		if(RequestsFlags.RequestDownload == Success)
+		{
+			UDS_TransferData();
 		}
 	}
 
@@ -255,9 +264,11 @@ void UDS_RequestDownload()
 	{
 		/* Wrong Value */
 		UDS_SendReponse(RequestDownloadNegativeResponse, RequestOutOfRange);
+		RequestsFlags.RequestDownload = Failed;
 		return;
 	}
 	ChangeDataEncryptingKey(EncryptionTechnique);
+	RequestsFlags.RequestDownload = Success;
 
 
 
@@ -290,6 +301,11 @@ void ChangeDataEncryptingKey(EncryptionTechniques Technique)
 	}
 }
 
+
+void UDS_TransferData()
+{
+
+}
 
 void UDS_SendReponse(McuResponse Reponse,NrcResponse NRC)
 {

@@ -13,6 +13,7 @@
 #include "Bit_Math.h"
 #include "aes.h"
 #include "BL_Functions.h"
+#include "Flashing.h"
 
 #define DUMMY_VARIABLE(x)		(void)x
 
@@ -22,9 +23,15 @@
 #define NEGATIVE_REPONSE_CONSTANT_HEXA		0x7F
 #define AES_KEY_SIZE						16
 
+/* 2 Bytes Payload + 128 Data in Transfer Data */
+#define MAX_DATA_RECEIVED					128
+#define MAX_SIZE_BUFFER						130
+
+#define APP_FLASH_START_ADDR 					0x8005000   //Application's Flash Address
+
 extern UART_HandleTypeDef huart1;
 /* Make it private to be unaccessible from outside this Module */
-static uint8_t ReceivingBuffer[8] = {0};
+static uint8_t ReceivingBuffer[MAX_SIZE_BUFFER] = {0};
 static uint8_t DataEncryptingKey [AES_KEY_SIZE] = {0};
 
 
@@ -149,7 +156,8 @@ void UDS_ReceiveCommand(void)
 		/* Make Sure that Request Download Has been Approved */
 		if(RequestsFlags.RequestDownload == Success)
 		{
-			UDS_TransferData();
+			/* I Removed the PayLoad 2 Bytes to have the Actual Data of the Application Binary File Length */
+			UDS_TransferData( DataLength[0] - 2);
 		}
 	}
 
@@ -302,9 +310,56 @@ void ChangeDataEncryptingKey(EncryptionTechniques Technique)
 }
 
 
-void UDS_TransferData()
+/* Data Transfer Frame Layout :
+ * Byte 0 -> SID
+ * Byte 1 -> Block Number
+ * Byte 2-n -> Actual Data with Length = DataLength
+ */
+void UDS_TransferData(const uint8_t DataLength)
 {
+	static uint8_t PreviusBlockNumber = 0;
+	/* The Size of the Received Data So far to check that i Have received all the Data */
+	static uint16_t AccumlativeReceivedDataSize = 0;
 
+	if(DataLength > MAX_DATA_RECEIVED)
+	{
+		/* This means I have Received more than 128 Bytes which is the Max Data Bytes
+		 * I can receive */
+		UDS_SendReponse(DataTransferNegativeResponse, IncorrectMessageLengthOrInvalidFormat);
+		return;
+	}
+
+	uint8_t BlockNumber = ReceivingBuffer[1];
+	uint8_t* Data = &ReceivingBuffer[2];
+
+	if (BlockNumber != PreviusBlockNumber + 1)
+	{
+		/* Wrong BlockNumber */
+		UDS_SendReponse(DataTransferNegativeResponse, WrongBlockSequenceCounter);
+		return;
+	}
+
+	/* Steps to Write The Data in the Flash Region of the Application */
+
+	if( DataLength < MAX_DATA_RECEIVED )
+	{
+		/* Padding the Remaining Bytes with 0xFF */
+		for (uint8_t idx = DataLength ; idx < MAX_DATA_RECEIVED; idx++)
+		{
+			Data[idx] = 0xFF;
+		}
+	}
+
+	uint32_t* DataToBeWritten = (uint32_t* )&ReceivingBuffer[2];
+	FlashUnlock();
+	for (uint8_t idx = 0; idx < MAX_DATA_RECEIVED / 4; idx++)
+	{
+		Flash_WriteAddress(APP_FLASH_START_ADDR + AccumlativeReceivedDataSize + (idx * 0x04 ) , &DataToBeWritten[idx]);
+	}
+	FlashLock();
+
+
+	AccumlativeReceivedDataSize = AccumlativeReceivedDataSize + DataLength;
 }
 
 void UDS_SendReponse(McuResponse Reponse,NrcResponse NRC)

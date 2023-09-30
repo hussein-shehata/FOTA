@@ -48,7 +48,7 @@ MEMORY
   MYRAM  (xrw)	  : ORIGIN = 0x20004C00,   LENGTH = 1K		/* Ram memory to hold shared variables between BL and APP*/
   														/* Made it Ram not Flash Memory to ease writing in it during run time */
   FLASH    (rx)    : ORIGIN = 0x8005000,   LENGTH = 39K
-  SharedAPIs    (rwx)    : ORIGIN = 0x8003C00,   LENGTH = 4K	/*SharedAPIs Flash Size */
+  SharedAPIs    (rwx)    : ORIGIN = 0x8004C00,   LENGTH = 1K	/*SharedAPIs Flash Size */
   NVM_Varaibles    (xrw)    : ORIGIN = 0x800EC00,   LENGTH = 1K	/*NVM Flash Size */
 }
 
@@ -81,7 +81,7 @@ SECTIONS
   } >FLASH
 
   /*My Shared APIs Section */
-  .API_SHARED_Section 0x8003C00:
+  .API_SHARED_Section 0x8004C00:
   {
   . = ALIGN(4);
   __API_SHARED_Section_start__ = .;

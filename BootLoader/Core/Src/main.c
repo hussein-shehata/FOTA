@@ -136,7 +136,6 @@ int main(void)
   /* USER CODE BEGIN WHILE */
 	uint8_t Status;
 	Status = CheckIfAppCorupted();
-	uint8_t* PtrTest = &(SharedStruct.DownloadRequestedFromApplication);
 	if (Status == 1)
 	{
 		uint8_t StatusFlashing = FlashApplication();

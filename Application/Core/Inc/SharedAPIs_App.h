@@ -10,7 +10,7 @@
 
 #include "stm32f1xx_hal.h"
 
-#define 	SHARED_APIS_MEMORY_ADDRESS		0x8003C00
+#define 	SHARED_APIS_MEMORY_ADDRESS		0x8004C00
 
 
 

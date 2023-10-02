@@ -106,7 +106,7 @@ void UDS_ReceiveCommand(void)
 	uint8_t DataLength[1] = {0};
 	UDS_SendHandShake();
 	/* Receive The Data Length of the following command */
-	HAL_UART_Receive(&huart1, DataLength, 1, 10);
+	HAL_UART_Receive(&huart1, DataLength, 1, 1000);
 	/* Receive the Command */
 	HAL_UART_Receive(&huart1, ReceivingBuffer, DataLength[0], 1000);
 
@@ -165,7 +165,8 @@ void UDS_ReceiveCommand(void)
 
 void UDS_SendHandShake(void)
 {
-	HAL_UART_Transmit(&huart1, (uint8_t*) DUMMY_BYTE, 1, 1);
+	uint8_t SendingBuffer[1] = {DUMMY_BYTE};
+	HAL_UART_Transmit(&huart1, SendingBuffer, 1, 100);
 }
 
 void UDS_ChangeSession(uint8_t RequestedSession)

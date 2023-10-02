@@ -24,9 +24,9 @@ typedef enum
 
 typedef enum
 {
-	DefaultSession,
-	ExtendedSession,
-	BootloaderSession
+	DefaultSession = 0x01,
+	ExtendedSession = 0x03,
+	BootloaderSession = 0x02
 }Sessions;
 
 typedef enum

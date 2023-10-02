@@ -95,6 +95,7 @@ typedef enum
 	NoNRC = 0xFF,   /* Used to be sent as parameter in send response function when it is +ve response */
 	ServiceNotSupported = 0x11,
 	IncorrectMessageLengthOrInvalidFormat = 0x13,
+	ConditionsNotCorrect = 0x22,
 	RequestOutOfRange = 0x31,
 	InvalidKey = 0x33,
 	WrongBlockSequenceCounter = 0x73

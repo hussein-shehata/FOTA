@@ -152,7 +152,6 @@ int main(void)
 
 	  SharedAPIs->ToggleLedPtr();
 	  HAL_Delay(1000);
-	  SharedAPIs->ToggleLedPtr();
 
 //		Counter ++;
 //		u32 address = 0x800EC08;
@@ -229,7 +228,6 @@ int main(void)
 		{
 //			GoToApplication();
 			UDS_MainFunction();
-			HAL_Delay(1000);
 		}
 
     /* USER CODE END WHILE */

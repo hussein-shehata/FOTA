@@ -9,17 +9,24 @@
 
 /* 1- Handle the case of request download positve response in send response function as the frame is diffcult to understand now */
 /* 2- Make Flags to grant access to each of the requested request */
+/* 3- Check that we have received all the Data in Data Transfer Function using Appsize member in the structure RequestDownloadFrame */
+/* 4- Decrypt the Data recevied from Data Transfer Frame as it come in encrypted way */
+/* 5- Make use of the Data Slot member in the struct */
 #include "UDS.h"
 #include "Bit_Math.h"
 #include "aes.h"
 #include "BL_Functions.h"
 #include "Flashing.h"
 
+#include <stdio.h>
+#include <time.h>
+#include <stdlib.h>
+
 #define DUMMY_VARIABLE(x)		(void)x
 
 #define RXNE_BIT							5
 #define DUMMY_BYTE							0xAA
-#define SEED_LENGTH							4
+#define SEED_LENGTH							16
 #define NEGATIVE_REPONSE_CONSTANT_HEXA		0x7F
 #define AES_KEY_SIZE						16
 
@@ -33,6 +40,9 @@ extern UART_HandleTypeDef huart1;
 /* Make it private to be unaccessible from outside this Module */
 static uint8_t ReceivingBuffer[MAX_SIZE_BUFFER] = {0};
 static uint8_t DataEncryptingKey [AES_KEY_SIZE] = {0};
+
+/* I will use 4 Bytes seed and key */
+static uint8_t Seed[SEED_LENGTH] = {0};
 
 
 /* As We are in UDS of the BootLoader Not the Application */
@@ -72,7 +82,7 @@ typedef struct
 
 static RequestDownloadFrameLayout RequestDownloadFrame;
 
-static uint32_t ComparingKey[SEED_LENGTH] ; /* Variable to hold the value of the Key to approve the security access */
+static uint8_t ComparingKey[SEED_LENGTH] ; /* Variable to hold the value of the Key to approve the security access */
 
 /* Runnable to check if the tool want to send Command */
 /* It is done by watching the RXNE Bit in the Status Register to check
@@ -135,6 +145,11 @@ void UDS_ReceiveCommand(void)
 				RequestsFlags.RequestSeed = Failed;
 				UDS_CompareKeys(&(ReceivingBuffer[2]));
 			}
+			else
+			{
+				/* Send -ve Response */
+				UDS_SendReponse(SendKeyNegativeResponse, ConditionsNotCorrect);
+			}
 		}
 		else
 		{
@@ -148,6 +163,11 @@ void UDS_ReceiveCommand(void)
 		if(RequestsFlags.ComparingKey == Success)
 		{
 			UDS_RequestDownload();
+		}
+		else
+		{
+			/* Send -ve Response */
+			UDS_SendReponse(RequestDownloadNegativeResponse, ConditionsNotCorrect);
 		}
 	}
 	else if(ReceivingBuffer[0] == TransferData)
@@ -200,23 +220,27 @@ void UDS_SendSeed()
 {
 	/* The Seed which is gonna be send to the Flashing Tool */
 	/* I will use 4 Bytes seed and key */
-	    uint8_t Seed[SEED_LENGTH] = {0};
+//	    uint8_t Seed[SEED_LENGTH] = {0};
+	    /* To Randomize the Seed Generated */
+		uint32_t Test = HAL_GetTick();
+	    srand(Test);
 	    /* Generate Number in between 0 -> 255 */
-	    Seed[0] = GenerateSeed(0,255);
-	    Seed[1] = GenerateSeed(0,255);
-	    Seed[2] = GenerateSeed(0,255);
-	    Seed[3] = GenerateSeed(0,255);
+//	    Seed[0] = GenerateSeed(0,255);
+//	    Seed[1] = GenerateSeed(0,255);
+//	    Seed[2] = GenerateSeed(0,255);
+//	    Seed[3] = GenerateSeed(0,255);
 
 	    /* Storing the Value before encrypting them to compare them with the
 	     * decrypted values which comes from the Tool
 	     */
 	    for (uint8_t idx = 0; idx < SEED_LENGTH; idx++)
 	    {
+	    	Seed[idx] = GenerateSeed(0,255);
 	    	ComparingKey[idx] = Seed[idx];
 	    }
 	    /* The Key used to encrypt and decrypt the data */
 	    /* It is a private key which is only known to the 2 parties " the Tool and the ECU" */
-	    uint8_t Seed_Encrypting_Key[] = { 0x2b, 0x7e, 0x15, 0x16};
+	    uint8_t Seed_Encrypting_Key[SEED_LENGTH] = { 0x2b, 0x7e, 0x15, 0x16};
 
 	    struct AES_ctx ctx;
 
@@ -225,8 +249,10 @@ void UDS_SendSeed()
 	//    printf("Seed After Encrypting is : %x %x %x %x\r\n",Seed[0],Seed[1], Seed[2], Seed[3]);
 
 	    /* Sending the Seed by Uart to the tool */
-	    HAL_UART_Transmit(&huart1, Seed, 4, 1000);
-	    UDS_SendReponse(SendKeyPostiveResponse, NoNRC);
+//	    HAL_UART_Transmit(&huart1, Seed, 4, 1000);
+//	    uint8_t Testing[4] = {0};
+
+	    UDS_SendReponse(RequestSeedPostiveResponse, NoNRC);
 	    RequestsFlags.RequestSeed = Success;
 
 }
@@ -366,7 +392,7 @@ void UDS_TransferData(const uint8_t DataLength)
 void UDS_SendReponse(McuResponse Reponse,NrcResponse NRC)
 {
 	uint8_t FrameLength = 0;
-	uint8_t SendingFrame[8] = {0};
+	uint8_t SendingFrame[18] = {0};
 	switch (Reponse)
 	{
 	case DefaultSessionPostiveResponse:
@@ -421,7 +447,25 @@ void UDS_SendReponse(McuResponse Reponse,NrcResponse NRC)
 		/* Adding 0x40 to the service ID */
 		SendingFrame[1] = SecurityAccess + 0x40;
 		SendingFrame[2] = RequestSeed;
-		FrameLength = 2;
+		SendingFrame[3] = Seed[0];
+		SendingFrame[4] = Seed[1];
+		SendingFrame[5] = Seed[2];
+		SendingFrame[6] = Seed[3];
+		SendingFrame[7] = Seed[4];
+		SendingFrame[8] = Seed[5];
+		SendingFrame[9] = Seed[6];
+		SendingFrame[10] = Seed[7];
+		SendingFrame[11] = Seed[8];
+		SendingFrame[12] = Seed[9];
+		SendingFrame[13] = Seed[10];
+		SendingFrame[14] = Seed[11];
+		SendingFrame[15] = Seed[12];
+		SendingFrame[16] = Seed[13];
+		SendingFrame[17] = Seed[14];
+		SendingFrame[18] = Seed[15];
+
+
+		FrameLength = 18;
 		DUMMY_VARIABLE(NRC);
 		break;
 

@@ -35,7 +35,8 @@ typedef enum
 	SecurityAccess = 0x27,
 	RequestDownload = 0x34,
 	TransferData = 0x36,
-	RequestTransferExit = 0x37
+	RequestTransferExit = 0x37,
+	RoutineControl = 0x31
 }UDS_Frames_Service_ID;
 
 
@@ -45,7 +46,8 @@ typedef enum
 	ExtendedSessionRequest = 0x03,
 	BootLoaderSessionRequest = 0x02,
 	RequestSeed = 0x11,
-	SendKeyRequest = 0x12
+	SendKeyRequest = 0x12,
+	RoutineStart = 0x01
 }UDS_Frames_SubService_ID;
 
 
@@ -85,6 +87,9 @@ typedef enum
 
 	DataTransferPostiveResponse,
 	DataTransferNegativeResponse,
+
+	MassErasePositiveReponse,
+	MassEraseNegativeReponse,
 
 	RequestExitPostiveResponse,
 	RequestExitNegativeResponse,

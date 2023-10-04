@@ -99,6 +99,20 @@ void ReceiveResponseSendKeyRequest()
     printf("\n");
 }
 
+void ReceiveResponseMassEraseRequest()
+{
+    uint8_t ReceivingBuffer[4] = {0};
+    uint8_t Length[1] = {0};
+    RS232_PollComport( comport, Length, 1);
+    RS232_PollComport( comport, ReceivingBuffer, Length[0]);
+    printf("The Response is : ");
+    for (uint8_t idx = 0; idx < Length[0]; idx++)
+    {
+        printf("%x ",ReceivingBuffer[idx]);
+    }
+    printf("\n");
+}
+
 // Function prototypes for menu options
 void option1();
 void option2();
@@ -130,8 +144,8 @@ int main(int argc, char *argv[])
         printf("3. Defualt Session \n");
         printf("4. Request Seed \n");
         printf("5. Send Key \n");
-        printf("6. Option 6\n");
-        printf("7. Option 7\n");
+        printf("6. Mass Erase\n");
+        printf("7. Data Transfer\n");
         printf("8. Option 8\n");
         printf("0. Exit\n");
 
@@ -367,12 +381,55 @@ void option5()
 
 }
 
-void option6() {
+void option6() 
+{
     printf("You selected Option 6.\n");
+    const uint8_t DataLength = 4;
+    uint8_t DataBuffer[4] = {0x31,0x01, 0xFF, 0x00};
+    uint8_t ReceivingBuffer[4];
+    /* First Send the Handshake Byte and expect receiving one */
+    RS232_SendByte(comport, 0xAA);
+
+    do
+    {
+        /* code */
+        RS232_PollComport( comport, ReceivingBuffer, 1);
+
+    } while (ReceivingBuffer[0] != 0xAA);
+
+    RS232_SendByte(comport, DataLength);
+
+    for (uint8_t idx = 0; idx < DataLength ; idx++)
+    {   
+        delay(1);
+        RS232_SendByte(comport, DataBuffer[idx]);
+    }
+    ReceiveResponseMassEraseRequest();
 }
 
-void option7() {
+void option7() 
+{
     printf("You selected Option 7.\n");
+    const uint8_t DataLength = 18;
+    uint8_t DataBuffer[18] = {0x36,0x01, 0xAA, 0xAA, 0xAA, 0xAA, 0xAA, 0xAA, 0xAA, 0xAA, 0xAA, 0xAA, 0xAA, 0xAA, 0xAA, 0xAA, 0xAA, 0xAA};
+    uint8_t ReceivingBuffer[4];
+    /* First Send the Handshake Byte and expect receiving one */
+    RS232_SendByte(comport, 0xAA);
+
+    do
+    {
+        /* code */
+        RS232_PollComport( comport, ReceivingBuffer, 1);
+
+    } while (ReceivingBuffer[0] != 0xAA);
+
+    RS232_SendByte(comport, DataLength);
+
+        for (uint8_t idx = 0; idx < DataLength ; idx++)
+    {   
+        delay(1);
+        RS232_SendByte(comport, DataBuffer[idx]);
+    }
 }
 
 void option8() {

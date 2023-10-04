@@ -12,6 +12,7 @@
 /* 3- Check that we have received all the Data in Data Transfer Function using Appsize member in the structure RequestDownloadFrame */
 /* 4- Decrypt the Data recevied from Data Transfer Frame as it come in encrypted way */
 /* 5- Make use of the Data Slot member in the struct */
+/* 6- Function to Mass Erase the flash memory upon request */
 #include "UDS.h"
 #include "Bit_Math.h"
 #include "aes.h"
@@ -35,6 +36,7 @@
 #define MAX_SIZE_BUFFER						130
 
 #define APP_FLASH_START_ADDR 					0x8005000   //Application's Flash Address
+#define APPLICATION_NUMBER_OF_PAGES				39			//Number of pages in Application Region
 
 extern UART_HandleTypeDef huart1;
 /* Make it private to be unaccessible from outside this Module */
@@ -174,11 +176,16 @@ void UDS_ReceiveCommand(void)
 	{
 		/* The Received Command is to TransferData */
 		/* Make Sure that Request Download Has been Approved */
-		if(RequestsFlags.RequestDownload == Success)
+		if(RequestsFlags.RequestDownload == Success && RequestsFlags.EraseMemory == Success)
 		{
 			/* I Removed the PayLoad 2 Bytes to have the Actual Data of the Application Binary File Length */
 			UDS_TransferData( DataLength[0] - 2);
 		}
+	}
+	else if(ReceivingBuffer[0] == 0x31 && ReceivingBuffer[1] == 0x01 && ReceivingBuffer[2] == 0xFF && ReceivingBuffer[3] == 0x00)
+	{
+		UDS_MassErase();
+		RequestsFlags.EraseMemory = Success;
 	}
 
 }
@@ -345,7 +352,7 @@ void ChangeDataEncryptingKey(EncryptionTechniques Technique)
 void UDS_TransferData(const uint8_t DataLength)
 {
 	static uint8_t PreviusBlockNumber = 0;
-	/* The Size of the Received Data So far to check that i Have received all the Data */
+	/* The Size of the Received Data So far to check that I Have received all the Data */
 	static uint16_t AccumlativeReceivedDataSize = 0;
 
 	if(DataLength > MAX_DATA_RECEIVED)
@@ -387,6 +394,24 @@ void UDS_TransferData(const uint8_t DataLength)
 
 
 	AccumlativeReceivedDataSize = AccumlativeReceivedDataSize + DataLength;
+	UDS_SendReponse(DataTransferPostiveResponse, NoNRC);
+	if( AccumlativeReceivedDataSize == RequestDownloadFrame.AppSize)
+	{
+		/* Then we Received all the Application Binary file */
+		RequestsFlags.RequestDownload = Failed;
+		RequestsFlags.EraseMemory = Failed;
+		AccumlativeReceivedDataSize = 0 ;
+	}
+}
+
+/* Upon Receiving the request to Erase all of the region of the application */
+void UDS_MassErase()
+{
+	for (uint32_t PageAddress = 0; PageAddress < APPLICATION_NUMBER_OF_PAGES; PageAddress++)
+	{
+		Flash_ErasePage(APP_FLASH_START_ADDR + (PageAddress * 1024) );
+	}
+	UDS_SendReponse(MassErasePositiveReponse, NoNRC);
 }
 
 void UDS_SendReponse(McuResponse Reponse,NrcResponse NRC)
@@ -522,6 +547,23 @@ void UDS_SendReponse(McuResponse Reponse,NrcResponse NRC)
 		SendingFrame[2] = TransferData;
 		SendingFrame[3] = NRC;
 		FrameLength = 3;
+		break;
+
+		/* Mass Erase Not handled correctly yet as it is a routine not a servie ID */
+	case MassErasePositiveReponse:
+		/* Adding 0x40 to the service ID */
+		SendingFrame[1] = RoutineControl + 0x40;
+		SendingFrame[2] = RoutineStart;
+		FrameLength = 2;
+		DUMMY_VARIABLE(NRC);
+		break;
+
+	case MassEraseNegativeReponse:
+		SendingFrame[1] = NEGATIVE_REPONSE_CONSTANT_HEXA;
+		SendingFrame[2] = RoutineControl;
+		SendingFrame[3] = RoutineStart;
+		SendingFrame[4] = NRC;
+		FrameLength = 4;
 		break;
 
 	case RequestExitPostiveResponse:

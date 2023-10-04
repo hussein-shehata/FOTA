@@ -46,7 +46,8 @@ MEMORY
 {
   RAM    (xrw)    : ORIGIN = 0x20000000,   LENGTH = 19K
   MYRAM  (xrw)	  : ORIGIN = 0x20004C00,   LENGTH = 1K		/* Ram memory to hold shared variables between BL and APP*/
-  														/* Made it Ram not Flash Memory to ease writing in it during run time */
+															/* Made it Ram not Flash Memory to ease writing in it during run time */
+  BL_Flash (xr)   : ORIGIN = 0x8000000,   LENGTH = 19K
   FLASH    (rx)    : ORIGIN = 0x8005000,   LENGTH = 39K
   SharedAPIs    (rwx)    : ORIGIN = 0x8004C00,   LENGTH = 1K	/*SharedAPIs Flash Size */
   NVM_Varaibles    (xrw)    : ORIGIN = 0x800EC00,   LENGTH = 1K	/*NVM Flash Size */

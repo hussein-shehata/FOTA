@@ -407,10 +407,12 @@ void UDS_TransferData(const uint8_t DataLength)
 /* Upon Receiving the request to Erase all of the region of the application */
 void UDS_MassErase()
 {
+	FlashUnlock();
 	for (uint32_t PageAddress = 0; PageAddress < APPLICATION_NUMBER_OF_PAGES; PageAddress++)
 	{
 		Flash_ErasePage(APP_FLASH_START_ADDR + (PageAddress * 1024) );
 	}
+	FlashLock();
 	UDS_SendReponse(MassErasePositiveReponse, NoNRC);
 }
 

@@ -494,7 +494,6 @@ void option7()
         {   
             delay(1);
             RS232_SendByte(comport, DataBuffer[idx]);
-            printf("%x ", DataBuffer[idx]);
         }
         AccumlativeSentData += DataToSend;
 

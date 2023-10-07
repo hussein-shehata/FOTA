@@ -10,7 +10,7 @@
 
 #include "stm32f1xx_hal.h"
 
-#define 	SHARED_APIS_MEMORY_ADDRESS		0x800E800
+#define 	SHARED_APIS_MEMORY_ADDRESS		0x8004C00
 
 
 
@@ -24,13 +24,13 @@ typedef enum{
 typedef struct
 {
 	void (*ToggleLedPtr) (void) ;
-	uint8_t (*FlashNewSoftwarePtr) (void) ;
+//	uint8_t (*FlashNewSoftwarePtr) (void) ;
 	void (*UDS_MainFunction) (void) ;
 }APIs;
 
 
 
-extern APIs SharedAPIs ;
+extern APIs* SharedAPIs ;
 
 
 void  ToggleTestLed(void);

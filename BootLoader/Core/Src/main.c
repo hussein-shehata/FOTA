@@ -150,8 +150,8 @@ int main(void)
 #define SHARED_APIS_TEST
 #ifdef SHARED_APIS_TEST
 
-//	  SharedAPIs->ToggleLedPtr();
-//	  HAL_Delay(1000);
+	  SharedAPIs.ToggleLedPtr();
+	  HAL_Delay(1000);
 
 //		Counter ++;
 //		u32 address = 0x800EC08;
@@ -222,11 +222,11 @@ int main(void)
 
 		if(SharedStruct.GoToBootloaderRequested == 1 )
 		{
-			SharedAPIs->UDS_MainFunction();
+			SharedAPIs.UDS_MainFunction();
 		}
 		else
 		{
-			GoToApplication();
+//			GoToApplication();
 			UDS_MainFunction();
 		}
 

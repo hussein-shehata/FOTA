@@ -113,7 +113,7 @@ int main(void)
     /* USER CODE END WHILE */
 //	  HAL_GPIO_WritePin(GPIOC, GPIO_PIN_13,GPIO_PIN_RESET);
 
-	  SharedAPIs.ToggleLedPtr();
+	  SharedAPIs->ToggleLedPtr();
 //	  SharedAPIs->FlashNewSoftwarePtr();
 	  HAL_Delay(5000);
     /* USER CODE BEGIN 3 */

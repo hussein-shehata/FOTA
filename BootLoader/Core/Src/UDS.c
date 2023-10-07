@@ -35,7 +35,7 @@
 #define MAX_DATA_RECEIVED					128
 #define MAX_SIZE_BUFFER						130
 
-#define APP_FLASH_START_ADDR 					0x8004C00   //Application's Flash Address
+#define APP_FLASH_START_ADDR 					0x8005000   //Application's Flash Address
 #define APPLICATION_NUMBER_OF_PAGES				39			//Number of pages in Application Region
 
 extern UART_HandleTypeDef huart1;

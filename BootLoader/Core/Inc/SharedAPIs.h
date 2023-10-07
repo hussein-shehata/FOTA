@@ -26,12 +26,12 @@ typedef struct
 	void (*UDS_MainFunction) (void) ;
 }APIs;
 
-
+extern APIs SharedAPIs ;
 
 
 #define LOCATE_SHARED_API		__attribute__((section(".API_SHARED_FuncSection")))
 
-extern APIs* SharedAPIs ;
+
 
 void InitSharedAPIs(void);
 void  ToggleTestLed(void);

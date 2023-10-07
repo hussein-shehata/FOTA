@@ -79,8 +79,8 @@ int main(void)
   /* MCU Configuration--------------------------------------------------------*/
 
   /* Reset of all peripherals, Initializes the Flash interface and the Systick. */
-//  HAL_Init();
-//  SystemInit();
+  HAL_Init();
+  SystemInit();
 
   /* USER CODE BEGIN Init */
 
@@ -97,12 +97,12 @@ int main(void)
   MX_GPIO_Init();
   MX_USART1_UART_Init();
   /* USER CODE BEGIN 2 */
-  printf("Starting Application (%d.%d)\n",APP_Version[0],APP_Version[1]);
+//  printf("Starting Application (%d.%d)\n",APP_Version[0],APP_Version[1]);
 
   HAL_GPIO_WritePin(GPIOC, GPIO_PIN_13,GPIO_PIN_RESET);
   HAL_Delay(1000);
-  MainEncrupt();
-  UDS_MainFunction();
+//  MainEncrupt();
+//  UDS_MainFunction();
 //  GoToBootLoader();
   /* USER CODE END 2 */
 

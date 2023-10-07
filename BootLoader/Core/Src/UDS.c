@@ -35,7 +35,7 @@
 #define MAX_DATA_RECEIVED					128
 #define MAX_SIZE_BUFFER						130
 
-#define APP_FLASH_START_ADDR 					0x8005000   //Application's Flash Address
+#define APP_FLASH_START_ADDR 					0x8004C00   //Application's Flash Address
 #define APPLICATION_NUMBER_OF_PAGES				39			//Number of pages in Application Region
 
 extern UART_HandleTypeDef huart1;
@@ -294,7 +294,7 @@ void UDS_RequestDownload()
 	RequestDownloadFrame.DataFormat = ReceivingBuffer[1];
 	RequestDownloadFrame.SlotUsed = ReceivingBuffer[2];
 	/* Take Byte 3 and 4 in the AppSize Variable */
-	RequestDownloadFrame.AppSize = ReceivingBuffer[3] | (ReceivingBuffer[4] << 8);
+	RequestDownloadFrame.AppSize = ReceivingBuffer[4] | (ReceivingBuffer[3] << 8);
 
 	/* Know the used Encryption Technique " First 4 Bits in the DataFormat" */
 	uint8_t EncryptionTechnique  = (RequestDownloadFrame.DataFormat & 0x0F) ;
@@ -311,7 +311,7 @@ void UDS_RequestDownload()
 	}
 	ChangeDataEncryptingKey(EncryptionTechnique);
 	RequestsFlags.RequestDownload = Success;
-
+	UDS_SendReponse(RequestDownloadPostiveResponse, NoNRC);
 
 
 }
@@ -378,7 +378,11 @@ void UDS_TransferData(const uint8_t DataLength)
 	if( DataLength < MAX_DATA_RECEIVED )
 	{
 		/* Padding the Remaining Bytes with 0xFF */
-		for (uint8_t idx = DataLength ; idx < MAX_DATA_RECEIVED; idx++)
+		/* We need to padding the last 3 bytes because if we have data length
+		 * not divisible by 4 like 10 byte we need to padd byte 11 and 12 and write 12 bytes
+		 * in the flash memory not 10 as we write in 4 bytes not 1 bytes
+		 */
+		for (uint8_t idx = DataLength ; idx < DataLength + 4; idx++)
 		{
 			Data[idx] = 0xFF;
 		}
@@ -386,7 +390,7 @@ void UDS_TransferData(const uint8_t DataLength)
 
 	uint32_t* DataToBeWritten = (uint32_t* )&ReceivingBuffer[2];
 	FlashUnlock();
-	for (uint8_t idx = 0; idx < MAX_DATA_RECEIVED / 4; idx++)
+	for (uint8_t idx = 0; idx < (MAX_DATA_RECEIVED / 4); idx++)
 	{
 		Flash_WriteAddress(APP_FLASH_START_ADDR + AccumlativeReceivedDataSize + (idx * 0x04 ) , &DataToBeWritten[idx]);
 	}
@@ -395,6 +399,7 @@ void UDS_TransferData(const uint8_t DataLength)
 
 	AccumlativeReceivedDataSize = AccumlativeReceivedDataSize + DataLength;
 	UDS_SendReponse(DataTransferPostiveResponse, NoNRC);
+	PreviusBlockNumber++;
 	if( AccumlativeReceivedDataSize == RequestDownloadFrame.AppSize)
 	{
 		/* Then we Received all the Application Binary file */

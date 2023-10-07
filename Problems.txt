@@ -7,3 +7,6 @@ e3ml wahda tania bt3ml nfs el haga bs tms7 region enta btdehalha
 
 
 - Fix the page erase to allow to overwrite the existing software
+
+
+- The Shared API memory is considered from the Application Flash region so it starts from 0x8004C00 not 0x8005000 

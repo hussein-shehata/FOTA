@@ -20,7 +20,7 @@ extern UART_HandleTypeDef huart1;
 #define ETX_OTA_NACK 0x01    // NACK
 
 
-#define ETX_APP_FLASH_ADDR 					0x8005000   //Application's Flash Address
+#define ETX_APP_FLASH_ADDR 					0x8004C00   //Application's Flash Address
 
 #define ETX_OTA_DATA_MAX_SIZE 					( 1024 )  //Maximum data Size
 #define ETX_OTA_DATA_OVERHEAD 					(    9 )  //data overhead

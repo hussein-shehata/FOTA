@@ -9,7 +9,7 @@
 #include "Print.h"
 #include "Flashing.h"
 
-#define 	SHARED_APIS_MEMORY_ADDRESS		0x8004C00
+#define 	SHARED_APIS_MEMORY_ADDRESS		0x800E800
 
 
 APIs* SharedAPIs  = (APIs* ) SHARED_APIS_MEMORY_ADDRESS;

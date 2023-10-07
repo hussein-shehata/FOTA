@@ -10,9 +10,10 @@
 int comport;
 int bdrate   = 115200;       /* 115200 baud */
 char mode[]={'8','N','1',0}; /* *-bits, No parity, 1 stop bit */
-char bin_name[1024];
-int ex = 0;
+char bin_name[1024] = "D:/0_Projects/FOTA/FOTA/Application/Debug/Application.bin \0";
+uint8_t APP_BIN[1024 * 39]; //Max is 39KB
 FILE *Fptr = NULL;
+uint32_t app_size = 0;
 
 uint8_t DecryptedSeed[16] = {0};
 
@@ -46,15 +47,22 @@ void OpenBinFile(void)
     if( Fptr == NULL )
     {
       printf("Can not open %s\n", bin_name);
-      ex = -1;
       return;
     }
 
+
     fseek(Fptr, 0L, SEEK_END);
-    uint32_t app_size = ftell(Fptr);
+    app_size = ftell(Fptr);
     fseek(Fptr, 0L, SEEK_SET);
 
     printf("File size = %d\n", app_size);
+
+            //read the full image
+    if( fread( APP_BIN, 1, app_size, Fptr ) != app_size )
+    {
+      printf("App/FW read Error\n");
+      return;
+    }
 }
 
 void ReceiveResponseRequestSeed()
@@ -113,6 +121,34 @@ void ReceiveResponseMassEraseRequest()
     printf("\n");
 }
 
+void ReceiveResponseDownloadRequest()
+{
+    uint8_t ReceivingBuffer[4] = {0};
+    uint8_t Length[1] = {0};
+    RS232_PollComport( comport, Length, 1);
+    RS232_PollComport( comport, ReceivingBuffer, Length[0]);
+    printf("The Response is : ");
+    for (uint8_t idx = 0; idx < Length[0]; idx++)
+    {
+        printf("%x ",ReceivingBuffer[idx]);
+    }
+    printf("\n");
+}
+
+void ReceiveReponseDataTransfer()
+{
+    uint8_t ReceivingBuffer[3] = {0};
+    uint8_t Length[1] = {0};
+    RS232_PollComport( comport, Length, 1);
+    RS232_PollComport( comport, ReceivingBuffer, Length[0]);
+    printf("The Response is : ");
+    for (uint8_t idx = 0; idx < Length[0]; idx++)
+    {
+        printf("%x ",ReceivingBuffer[idx]);
+    }
+    printf("\n");
+}
+
 // Function prototypes for menu options
 void option1();
 void option2();
@@ -132,7 +168,6 @@ int main(int argc, char *argv[])
     if( RS232_OpenComport(comport, bdrate, mode, 0) )
     {
       printf("Can not open comport\n");
-      ex = -1;
       return -1;
     }
 
@@ -146,7 +181,7 @@ int main(int argc, char *argv[])
         printf("5. Send Key \n");
         printf("6. Mass Erase\n");
         printf("7. Data Transfer\n");
-        printf("8. Option 8\n");
+        printf("8. Request Download\n");
         printf("0. Exit\n");
 
         // Prompt the user for a choice
@@ -409,10 +444,79 @@ void option6()
 
 void option7() 
 {
-    printf("You selected Option 7.\n");
-    const uint8_t DataLength = 18;
-    uint8_t DataBuffer[18] = {0x36,0x01, 0xAA, 0xAA, 0xAA, 0xAA, 0xAA, 0xAA, 0xAA, 0xAA, 0xAA, 0xAA, 0xAA, 0xAA, 0xAA, 0xAA, 0xAA, 0xAA};
+    uint8_t DataTransferComplete = false;
+    static uint8_t BlockNumber = 1;
+    static uint16_t AccumlativeSentData = 0;
+    uint8_t DataToSend = 0;
+    uint8_t DataLength = 0;
+    uint8_t DataBuffer[128 + 2] = {0x36};
     uint8_t ReceivingBuffer[4];
+
+    while(DataTransferComplete == false)
+    {
+        DataBuffer[1] = BlockNumber;
+        BlockNumber++ ;
+
+
+        if (app_size - AccumlativeSentData > 128 )
+        {
+            DataToSend = 128;
+        }
+        else
+        {
+            DataToSend = app_size - AccumlativeSentData;
+            DataTransferComplete = true; // This the last Frame
+        }
+        
+
+        DataLength = 2 + DataToSend;
+
+
+        /* First Send the Handshake Byte and expect receiving one */
+        RS232_SendByte(comport, 0xAA);
+
+        do
+        {
+            /* code */
+            RS232_PollComport( comport, ReceivingBuffer, 1);
+
+        } while (ReceivingBuffer[0] != 0xAA);
+
+        RS232_SendByte(comport, DataLength);
+
+        for(uint8_t idx = 0; idx < DataToSend; idx++ )
+        {
+            DataBuffer[idx + 2] = APP_BIN[AccumlativeSentData + idx];
+        }
+
+
+        for (uint8_t idx = 0; idx < DataLength ; idx++)
+        {   
+            delay(1);
+            RS232_SendByte(comport, DataBuffer[idx]);
+            printf("%x ", DataBuffer[idx]);
+        }
+        AccumlativeSentData += DataToSend;
+
+        ReceiveReponseDataTransfer();
+
+    }
+}
+
+void option8() 
+{
+    printf("You selected Option 8.\n");
+    const uint8_t DataLength = 5;
+    // TODO Add the slot option and the encryption Technique
+    uint8_t DataBuffer[5] = {0x34, 0x00, 0x00};
+    
+    uint8_t ReceivingBuffer[2];
+
+    OpenBinFile();
+    printf("After Exiting Function \n");
+    DataBuffer[3] = (app_size >> 8) & 0xFF; // Take the MSB
+    DataBuffer[4] = app_size &0xFF; // Take the LSB
+    printf("The LSB %x \n", DataBuffer[4]);
     /* First Send the Handshake Byte and expect receiving one */
     RS232_SendByte(comport, 0xAA);
 
@@ -423,15 +527,15 @@ void option7()
 
     } while (ReceivingBuffer[0] != 0xAA);
 
+
     RS232_SendByte(comport, DataLength);
 
-        for (uint8_t idx = 0; idx < DataLength ; idx++)
+    for (uint8_t idx = 0; idx < DataLength ; idx++)
     {   
         delay(1);
         RS232_SendByte(comport, DataBuffer[idx]);
+        printf(" Data : %x %x %X %X %X", DataBuffer[0], DataBuffer[1], DataBuffer[2], DataBuffer[3], DataBuffer[4]);
     }
-}
 
-void option8() {
-    printf("You selected Option 8.\n");
+    ReceiveResponseDownloadRequest();
 }

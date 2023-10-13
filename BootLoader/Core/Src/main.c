@@ -138,11 +138,11 @@ int main(void)
 	Status = CheckIfAppCorupted();
 	if (Status == 1)
 	{
-		uint8_t StatusFlashing = FlashApplication();
+//		uint8_t StatusFlashing = FlashApplication();
 	}
 	else if (SharedStruct.DownloadRequestedFromApplication == 1)
 	{
-		uint8_t StatusFlashing = FlashApplication();
+//		uint8_t StatusFlashing = FlashApplication();
 	}
 
   while (1)

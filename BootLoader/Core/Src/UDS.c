@@ -349,7 +349,7 @@ void ChangeDataEncryptingKey(EncryptionTechniques Technique)
  * Byte 1 -> Block Number
  * Byte 2-n -> Actual Data with Length = DataLength
  */
-void UDS_TransferData(const uint8_t DataLength)
+void UDS_TransferData(uint8_t DataLength)
 {
 	static uint8_t PreviusBlockNumber = 0;
 	/* The Size of the Received Data So far to check that I Have received all the Data */
@@ -373,9 +373,14 @@ void UDS_TransferData(const uint8_t DataLength)
 		return;
 	}
 
+
+	/* Steps to Decrypting the Bytes sent from the Tool According to the Encryption method used and sent in Request Download Frame */
+	DecryptingTheSoftwareBytes(&ReceivingBuffer[2], DataLength);
+
+
 	/* Steps to Write The Data in the Flash Region of the Application */
 
-	if( DataLength < MAX_DATA_RECEIVED )
+	if( DataLength % 4 != 0 )
 	{
 		/* Padding the Remaining Bytes with 0xFF */
 		/* We need to padding the last 3 bytes because if we have data length
@@ -386,11 +391,20 @@ void UDS_TransferData(const uint8_t DataLength)
 		{
 			Data[idx] = 0xFF;
 		}
+		/* To write the last 2 Bytes in the above example
+		 * 10 / 4 = 2 Bytes , So the Below for loop will not write the last 2 bytes if we didnot increment the data length
+		 */
+		DataLength = DataLength + 1;
 	}
 
+
+
 	uint32_t* DataToBeWritten = (uint32_t* )&ReceivingBuffer[2];
+
+
+
 	FlashUnlock();
-	for (uint8_t idx = 0; idx < (MAX_DATA_RECEIVED / 4); idx++)
+	for (uint8_t idx = 0; idx < (DataLength / 4); idx++)
 	{
 		Flash_WriteAddress(APP_FLASH_START_ADDR + AccumlativeReceivedDataSize + (idx * 0x04 ) , &DataToBeWritten[idx]);
 	}
@@ -398,15 +412,29 @@ void UDS_TransferData(const uint8_t DataLength)
 
 
 	AccumlativeReceivedDataSize = AccumlativeReceivedDataSize + DataLength;
+//	HAL_Delay(10000);
 	UDS_SendReponse(DataTransferPostiveResponse, NoNRC);
 	PreviusBlockNumber++;
-	if( AccumlativeReceivedDataSize == RequestDownloadFrame.AppSize)
+	if( AccumlativeReceivedDataSize >= RequestDownloadFrame.AppSize)
 	{
 		/* Then we Received all the Application Binary file */
 		RequestsFlags.RequestDownload = Failed;
 		RequestsFlags.EraseMemory = Failed;
 		AccumlativeReceivedDataSize = 0 ;
+		PreviusBlockNumber = 0;
 	}
+}
+
+void DecryptingTheSoftwareBytes(uint8_t* DataBuffer, uint8_t DataLength)
+{
+    struct AES_ctx ctx;
+
+    AES_init_ctx(&ctx, DataEncryptingKey);
+    /* Decrypting each 16 Byte togther as the We encrypt using 128 Bits Key " 16 Bytes " */
+    for (uint8_t idx = 0; idx < DataLength; idx = idx + 16)
+    {
+    	AES_ECB_decrypt(&ctx, &DataBuffer[idx]);
+    }
 }
 
 /* Upon Receiving the request to Erase all of the region of the application */
@@ -544,7 +572,7 @@ void UDS_SendReponse(McuResponse Reponse,NrcResponse NRC)
 	case DataTransferPostiveResponse:
 		/* Adding 0x40 to the service ID */
 		SendingFrame[1] = TransferData + 0x40;
-		SendingFrame[2] = ReceivingBuffer[2];
+		SendingFrame[2] = ReceivingBuffer[1];
 		FrameLength = 2;
 		DUMMY_VARIABLE(NRC);
 		break;

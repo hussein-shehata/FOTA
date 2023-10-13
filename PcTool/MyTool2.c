@@ -5,6 +5,8 @@
 #include "RS232\rs232.h"
 #include "aes.h"
 
+#define AES_KEY_SIZE        16
+
 
 
 int comport;
@@ -16,6 +18,43 @@ FILE *Fptr = NULL;
 uint32_t app_size = 0;
 
 uint8_t DecryptedSeed[16] = {0};
+/* TODO will make it not constant but depends on the Request Data Frame */
+uint8_t DataEncryptingKey[16] = {0xAB, 0xAB, 0xAB, 0xAB, 0xAB, 0xAB, 0xAB, 0xAB, 0xAB, 0xAB, 0xAB, 0xAB, 0xAB, 0xAB, 0xAB, 0xAB};
+
+
+typedef enum
+{
+	Key1Encryption,
+	Key2Encryption,
+	Key3Encryption
+}EncryptionTechniques;
+
+void ChangeDataEncryptingKey(EncryptionTechniques Technique)
+{
+	uint8_t KeyByte = 0;	/* Will be used to make the Encryption Key */
+	if (Technique == Key1Encryption)
+	{
+		KeyByte = 0xAB;
+	}
+	else if (Technique == Key2Encryption)
+	{
+		KeyByte = 0xCD;
+	}
+	else if (Technique == Key3Encryption)
+	{
+		KeyByte = 0xEF;
+	}
+	else
+	{
+		// Do Nothing
+	}
+
+
+	for (uint16_t idx = 0; idx < AES_KEY_SIZE; idx++)
+	{
+		DataEncryptingKey[idx] = KeyByte;
+	}
+}
 
 void OpenBinFile(void);
 
@@ -229,7 +268,6 @@ int main(int argc, char *argv[])
 // Define the functions for each menu option
 void option1() 
 {
-    printf("You selected Option 1.\n");
     /* First Byte is the length of the actual data*/
     uint8_t DataBuffer[2] = {0x10,0x03};
     uint8_t ReceivingBuffer[4];
@@ -273,7 +311,6 @@ void option1()
 
 void option2() 
 {
-    printf("You selected Option 2.\n");
     /* First Byte is the length of the actual data*/
     uint8_t DataBuffer[2] = {0x10,0x02};
     uint8_t ReceivingBuffer[4];
@@ -317,7 +354,6 @@ void option2()
 
 void option3() 
 {
-    printf("You selected Option 3.\n");
     /* First Byte is the length of the actual data*/
     uint8_t DataBuffer[2] = {0x10,0x01};
     uint8_t ReceivingBuffer[4];
@@ -418,7 +454,6 @@ void option5()
 
 void option6() 
 {
-    printf("You selected Option 6.\n");
     const uint8_t DataLength = 4;
     uint8_t DataBuffer[4] = {0x31,0x01, 0xFF, 0x00};
     uint8_t ReceivingBuffer[4];
@@ -452,6 +487,9 @@ void option7()
     uint8_t DataBuffer[128 + 2] = {0x36};
     uint8_t ReceivingBuffer[4];
 
+    struct AES_ctx ctx;
+    AES_init_ctx(&ctx, DataEncryptingKey);
+
     while(DataTransferComplete == false)
     {
         DataBuffer[1] = BlockNumber;
@@ -472,6 +510,41 @@ void option7()
         DataLength = 2 + DataToSend;
 
 
+        for(uint8_t idx = 0; idx < DataToSend; idx++ )
+        {
+            DataBuffer[idx + 2] = APP_BIN[AccumlativeSentData + idx];
+        }
+
+        /* Encrypting the Data */
+
+        /* First Padding if the Length is not divisible by 16 bytes*/
+        if (DataToSend % 16 != 0)
+        {
+            /* Padding till it becomes divisible by 16 */
+            uint8_t PaddingBytesNumber = 16 - (DataToSend % 16) ;
+            for (uint8_t idx = DataToSend ; idx < PaddingBytesNumber + DataToSend; idx++)
+            {
+                /* Padding with 0xFF */
+                DataBuffer[idx + 2] = 0xFF;
+            }
+
+            DataLength = DataLength + PaddingBytesNumber ;
+            DataToSend = DataToSend + PaddingBytesNumber ;
+        }
+
+        /*          Testing             */
+        // for(uint8_t idx = 0; idx < DataLength; idx++)
+        // {
+        //     printf("%x ",DataBuffer[idx]);
+        // }
+        // printf("\n");
+
+        for (uint8_t idx = 0 ; idx < DataToSend; idx = idx + 16)
+        {
+            AES_ECB_encrypt(&ctx, &DataBuffer[2 + idx]);
+        }
+
+
         /* First Send the Handshake Byte and expect receiving one */
         RS232_SendByte(comport, 0xAA);
 
@@ -481,20 +554,21 @@ void option7()
             RS232_PollComport( comport, ReceivingBuffer, 1);
 
         } while (ReceivingBuffer[0] != 0xAA);
-
+        // printf("Received HandShake \n");
         RS232_SendByte(comport, DataLength);
 
-        for(uint8_t idx = 0; idx < DataToSend; idx++ )
-        {
-            DataBuffer[idx + 2] = APP_BIN[AccumlativeSentData + idx];
-        }
 
 
-        for (uint8_t idx = 0; idx < DataLength ; idx++)
+        RS232_SendByte(comport, 0x36);
+        RS232_SendByte(comport, BlockNumber - 1);
+        // printf("Encrypted Value : ");
+        for (uint8_t idx = 2; idx < DataLength ; idx++)
         {   
             delay(1);
+            // printf("%x ", DataBuffer[idx]);
             RS232_SendByte(comport, DataBuffer[idx]);
         }
+        // printf("\n");
         AccumlativeSentData += DataToSend;
 
         ReceiveReponseDataTransfer();
@@ -504,18 +578,20 @@ void option7()
 
 void option8() 
 {
-    printf("You selected Option 8.\n");
     const uint8_t DataLength = 5;
+    int Technique = 0xFF;
     // TODO Add the slot option and the encryption Technique
+    printf("What Encyrption Technique you want : 0 or 1 or 2 ->  ");
+    scanf("%d",&Technique);
     uint8_t DataBuffer[5] = {0x34, 0x00, 0x00};
+    DataBuffer[1] |= (Technique &0x0F);  /* the Technique is the LOW Nibble of the second byte */
     
+    ChangeDataEncryptingKey(Technique);
     uint8_t ReceivingBuffer[2];
 
     OpenBinFile();
-    printf("After Exiting Function \n");
     DataBuffer[3] = (app_size >> 8) & 0xFF; // Take the MSB
     DataBuffer[4] = app_size &0xFF; // Take the LSB
-    printf("The LSB %x \n", DataBuffer[4]);
     /* First Send the Handshake Byte and expect receiving one */
     RS232_SendByte(comport, 0xAA);
 
@@ -528,12 +604,14 @@ void option8()
 
 
     RS232_SendByte(comport, DataLength);
+    printf("%x %x %x %x ",DataBuffer[0], DataBuffer[1],DataBuffer[2],DataBuffer[3]);
+    // printf("Sent the Length \n");
 
     for (uint8_t idx = 0; idx < DataLength ; idx++)
     {   
         delay(1);
+        printf("%x ", DataBuffer[idx]);
         RS232_SendByte(comport, DataBuffer[idx]);
-        printf(" Data : %x %x %X %X %X", DataBuffer[0], DataBuffer[1], DataBuffer[2], DataBuffer[3], DataBuffer[4]);
     }
 
     ReceiveResponseDownloadRequest();
